@@ -4,7 +4,7 @@
 
 Finds semantically similar but syntactically different code patterns that waste AI context and confuse models.
 
-## �️ Architecture
+## 🏛️ Architecture
 
 ```
                            🎯 USER
@@ -24,7 +24,7 @@ Finds semantically similar but syntactically different code patterns that waste 
 └─────────────┘
 ```
 
-## �🌍 Language Support
+## 🌍 Language Support
 
 **Currently Supported (64% market coverage):**
 - ✅ **TypeScript** (`.ts`, `.tsx`) - AST-based pattern extraction
