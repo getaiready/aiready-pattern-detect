@@ -300,12 +300,18 @@ export function normalizeReport(raw: any): AnalysisData {
         let details: any[] = item.recommendations || [];
 
         // Patterns: Add actual duplicates
-        if (item.toolName === 'patterns' && Array.isArray(raw.duplicates)) {
+        if (
+          item.toolName === 'pattern-detect' &&
+          Array.isArray(raw.duplicates)
+        ) {
           details = [...details, ...raw.duplicates];
         }
 
         // Context: Add context results
-        if (item.toolName === 'context' && Array.isArray(raw.context)) {
+        if (
+          item.toolName === 'context-analyzer' &&
+          Array.isArray(raw.context)
+        ) {
           details = [...details, ...raw.context];
         }
 

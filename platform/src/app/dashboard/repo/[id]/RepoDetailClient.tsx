@@ -91,6 +91,28 @@ export default function RepoDetailClient({ repo, user }: Props) {
       ([toolName, toolData]: [string, any]) => {
         if (Array.isArray(toolData.details)) {
           toolData.details.forEach((issue: any) => {
+            // Handle tool-specific message mapping
+            let msg = issue.message || issue.description || issue.action;
+            let act =
+              issue.action ||
+              issue.suggestion ||
+              (Array.isArray(issue.recommendations)
+                ? issue.recommendations[0]
+                : issue.recommendation);
+
+            if (toolName === 'semanticDuplicates' && issue.similarity) {
+              msg = `${issue.patternType ? issue.patternType.charAt(0).toUpperCase() + issue.patternType.slice(1) : 'Duplicate'} (${Math.round(issue.similarity * 100)}% similarity)`;
+              act = issue.suggestion || issue.action;
+            } else if (
+              toolName === 'contextFragmentation' &&
+              Array.isArray(issue.issues)
+            ) {
+              msg = issue.issues[0] || 'Context fragmentation';
+              act = Array.isArray(issue.recommendations)
+                ? issue.recommendations[0]
+                : issue.action;
+            }
+
             allIssues.push({
               ...issue,
               tool: toolName,
@@ -105,7 +127,8 @@ export default function RepoDetailClient({ repo, user }: Props) {
                       ? 'minor'
                       : 'major'),
               // Normalize message
-              message: issue.message || issue.action || 'Unknown issue',
+              message: msg || 'Unknown issue',
+              action: act,
             });
           });
         }

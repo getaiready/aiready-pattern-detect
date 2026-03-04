@@ -1031,20 +1031,47 @@ function RepoCard({
         </div>
 
         {analysis && (
-          <Link href={`/dashboard/repo/${repo.id}`}>
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500 text-white text-xs font-bold rounded-lg hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 border border-indigo-400/30"
-            >
-              <ChartIcon className="w-3.5 h-3.5" />
-              View Report Details
-            </motion.button>
-          </Link>
+          <div className="space-y-2">
+            <Link href={`/dashboard/repo/${repo.id}`}>
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500 text-white text-xs font-bold rounded-lg hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 border border-indigo-400/30"
+              >
+                <ChartIcon className="w-3.5 h-3.5" />
+                View Report Details
+              </motion.button>
+            </Link>
+
+            <div className="grid grid-cols-2 gap-2">
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={onViewTrends}
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 text-slate-300 text-[10px] font-bold rounded-lg hover:bg-slate-700 hover:text-white transition-all border border-slate-700/50"
+              >
+                <TrendingUpIcon className="w-3.5 h-3.5" />
+                Trends
+              </motion.button>
+              <Link
+                href={`/dashboard/repo/${repo.id}/visualize`}
+                className="block"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full h-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 text-slate-300 text-[10px] font-bold rounded-lg hover:bg-slate-700 hover:text-white transition-all border border-slate-700/50"
+                >
+                  <RocketIcon className="w-3.5 h-3.5" />
+                  Map
+                </motion.button>
+              </Link>
+            </div>
+          </div>
         )}
 
         <div className="flex items-center justify-between gap-2">
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <IconButton
               onClick={() =>
                 window.open(`/api/agent/metadata?repoId=${repo.id}`)
@@ -1056,11 +1083,6 @@ function RepoCard({
               onClick={onBadge}
               icon={<ShieldIcon className="w-4 h-4" />}
               tooltip="AI-Readiness Badge"
-            />
-            <IconButton
-              onClick={onViewTrends}
-              icon={<TrendingUpIcon className="w-4 h-4" />}
-              tooltip="View Trends"
             />
           </div>
 
