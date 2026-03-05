@@ -94,10 +94,33 @@ export async function updateRepositoryScore(
     new UpdateCommand({
       TableName: TABLE_NAME,
       Key: { PK: `REPO#${repoId}`, SK: '#METADATA' },
-      UpdateExpression: 'SET aiScore = :s, lastAnalysisAt = :t, updatedAt = :t',
+      UpdateExpression:
+        'SET aiScore = :s, lastAnalysisAt = :t, updatedAt = :t, isScanning = :f',
       ExpressionAttributeValues: {
         ':s': score,
         ':t': new Date().toISOString(),
+        ':f': false,
+      },
+    })
+  );
+}
+
+export async function setRepositoryScanning(
+  repoId: string,
+  isScanning: boolean,
+  error?: string
+): Promise<void> {
+  const TABLE_NAME = getTableName();
+  const now = new Date().toISOString();
+  await doc.send(
+    new UpdateCommand({
+      TableName: TABLE_NAME,
+      Key: { PK: `REPO#${repoId}`, SK: '#METADATA' },
+      UpdateExpression: 'SET isScanning = :s, lastError = :e, updatedAt = :t',
+      ExpressionAttributeValues: {
+        ':s': isScanning,
+        ':e': error || null,
+        ':t': now,
       },
     })
   );

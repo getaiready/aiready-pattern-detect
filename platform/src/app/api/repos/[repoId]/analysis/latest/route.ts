@@ -54,6 +54,11 @@ export async function GET(
       );
     }
 
+    // To prevent AWS Lambda 6MB payload limit 502 Bad Gateway errors, omit the massive rawOutput field.
+    if (fullAnalysis.rawOutput) {
+      delete fullAnalysis.rawOutput;
+    }
+
     return NextResponse.json({
       repo,
       analysis: fullAnalysis,

@@ -93,6 +93,17 @@ export default function DashboardClient({
   const [scanningRepoId, setScanningRepoId] = useState<string | null>(null);
   const [pendingScanRepoIds, setPendingScanRepoIds] = useState<string[]>([]);
 
+  // Initialize pending scans from repo data
+  useEffect(() => {
+    const scanningIds = repos.filter((r) => r.isScanning).map((r) => r.id);
+    if (scanningIds.length > 0) {
+      setPendingScanRepoIds((prev) => {
+        const next = [...new Set([...prev, ...scanningIds])];
+        return next.length === prev.length ? prev : next;
+      });
+    }
+  }, [repos]);
+
   // Automatic Refresh Polling
   useEffect(() => {
     if (pendingScanRepoIds.length === 0) return;
@@ -112,8 +123,10 @@ export default function DashboardClient({
           latestAnalysis: r.latestAnalysis || null,
         }));
 
-        // Determine who finished
+        // Determine who finished or failed
         const finishedIds: string[] = [];
+        const failedIds: string[] = [];
+
         pendingScanRepoIds.forEach((id) => {
           const oldRepo = repos.find((r) => r.id === id);
           const newRepo = updatedRepos.find((r) => r.id === id);
@@ -129,6 +142,11 @@ export default function DashboardClient({
             toast.success(`Scan complete for ${newRepo.name}!`, {
               description: `New AI Score: ${newRepo.aiScore || 'N/A'}`,
             });
+          } else if (newRepo?.lastError && !oldRepo?.lastError) {
+            failedIds.push(id);
+            toast.error(`Scan failed for ${newRepo.name}`, {
+              description: newRepo.lastError,
+            });
           }
         });
 
@@ -136,9 +154,11 @@ export default function DashboardClient({
         setRepos(updatedRepos);
 
         // Remove from pending
-        if (finishedIds.length > 0) {
+        if (finishedIds.length > 0 || failedIds.length > 0) {
           setPendingScanRepoIds((prev) =>
-            prev.filter((id) => !finishedIds.includes(id))
+            prev.filter(
+              (id) => !finishedIds.includes(id) && !failedIds.includes(id)
+            )
           );
         }
       } catch (err) {
@@ -828,7 +848,7 @@ function RepoCard({
   repo,
   index,
   uploading,
-  scanning,
+  scanning: localScanning,
   onUpload,
   onScan,
   onDelete,
@@ -847,6 +867,7 @@ function RepoCard({
 }) {
   const score = repo.aiScore;
   const analysis = repo.latestAnalysis;
+  const isScanning = localScanning || repo.isScanning;
 
   return (
     <motion.div
@@ -855,14 +876,24 @@ function RepoCard({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="glass-card rounded-2xl p-5 flex flex-col gap-4 card-hover"
+      className={`glass-card rounded-2xl p-5 flex flex-col gap-4 card-hover ${isScanning ? 'border-indigo-500/50 shadow-lg shadow-indigo-500/10' : ''}`}
     >
       {/* Repo header */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-white truncate text-lg hover:text-cyan-400 transition-colors">
-            <Link href={`/dashboard/repo/${repo.id}`}>{repo.name}</Link>
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-white truncate text-lg hover:text-cyan-400 transition-colors">
+              <Link href={`/dashboard/repo/${repo.id}`}>{repo.name}</Link>
+            </h3>
+            {isScanning && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                  Scanning
+                </span>
+              </div>
+            )}
+          </div>
           {repo.description && (
             <p className="text-xs text-slate-400 mt-0.5 truncate">
               {repo.description}
@@ -877,7 +908,7 @@ function RepoCard({
             {repo.url}
           </a>
         </div>
-        {score != null && (
+        {score != null && !isScanning && (
           <div
             className={`flex-shrink-0 text-center px-4 py-2 rounded-xl border ${scoreBg(score)} shadow-lg`}
           >
@@ -891,8 +922,15 @@ function RepoCard({
         )}
       </div>
 
+      {repo.lastError && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-start gap-2">
+          <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <p>{repo.lastError}</p>
+        </div>
+      )}
+
       {/* Breakdown grid */}
-      {analysis?.breakdown && (
+      {analysis?.breakdown && !isScanning && (
         <div className="grid grid-cols-3 gap-2">
           {Object.entries(analysis.breakdown).map(([key, val]) => (
             <BreakdownItem

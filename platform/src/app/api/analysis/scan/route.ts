@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/api/auth/[...nextauth]/route';
-import { getRepository } from '@/lib/db';
+import { getRepository, setRepositoryScanning } from '@/lib/db';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { Resource } from 'sst';
 
@@ -37,6 +37,9 @@ export async function POST(request: NextRequest) {
     if (repo.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
+    // Set status to scanning
+    await setRepositoryScanning(repoId, true);
 
     // Send message to SQS
     await sqs.send(

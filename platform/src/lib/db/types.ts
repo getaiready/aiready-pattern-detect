@@ -47,6 +47,8 @@ export interface Repository {
   defaultBranch: string;
   lastAnalysisAt?: string;
   aiScore?: number;
+  isScanning?: boolean;
+  lastError?: string;
   createdAt: string;
   updatedAt: string;
 }

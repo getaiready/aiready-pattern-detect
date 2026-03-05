@@ -12,7 +12,12 @@ import {
   extractSummary,
   storeAnalysis,
 } from '../lib/storage';
-import { createAnalysis, getRepository } from '../lib/db';
+import {
+  createAnalysis,
+  getRepository,
+  updateRepositoryScore,
+  setRepositoryScanning,
+} from '../lib/db';
 
 export async function handler(event: SQSEvent) {
   for (const record of event.Records) {
@@ -33,6 +38,9 @@ export async function handler(event: SQSEvent) {
     const tempDir = path.join('/tmp', `repo-${randomUUID()}`);
 
     try {
+      // Clear any previous error
+      await setRepositoryScanning(repoId, true);
+
       console.log(`[ScanWorker] Cloning ${repo.url} to ${tempDir}...`);
 
       await git.clone({
@@ -67,13 +75,16 @@ export async function handler(event: SQSEvent) {
           'patterns',
           'context',
           'consistency',
-          'changeAmplification',
-          'aiSignalClarity',
-          'grounding',
+          'change-amplification',
+          'ai-signal-clarity',
+          'agent-grounding',
           'testability',
           'doc-drift',
           'deps-health',
         ],
+        progressCallback: (event: any) => {
+          console.log(`[ScanWorker] Tool ${event.tool} completed`);
+        },
       } as any);
 
       console.log(`[ScanWorker] Calculating scores...`);
@@ -114,11 +125,20 @@ export async function handler(event: SQSEvent) {
         createdAt: new Date().toISOString(),
       });
 
+      // Update repository score and clear scanning status
+      await updateRepositoryScore(repoId, aiScore);
+
       console.log(
         `[ScanWorker] Successfully completed analysis ${analysisId} for repo ${repoId}`
       );
     } catch (error) {
       console.error(`[ScanWorker] Error processing repo ${repoId}:`, error);
+      // Update repository status with error
+      await setRepositoryScanning(
+        repoId,
+        false,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     } finally {
       // Cleanup temp directory
       try {
