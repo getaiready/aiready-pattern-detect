@@ -79,9 +79,12 @@ function RepoDetailContent({ repo, user, teams, overallScore }: Props) {
   const allIssues: any[] = [];
   if (analysis?.breakdown) {
     // Determine the likely project root to relativize paths
-    // Look for everything after the repo name in the path
+    // Look for /tmp/repo-uuid/ or the repo name
     const repoName = repo.name.split('/').pop() || repo.name;
-    const pathPrefixRegex = new RegExp(`.*\\/${repoName}\\/`, 'g');
+    const pathPrefixRegex = new RegExp(
+      `(?:.*\\/repo-[a-f0-9-]+\\/|.*\\/${repoName}\\/)`,
+      'g'
+    );
 
     const cleanPath = (p: string) => {
       if (!p) return p;
