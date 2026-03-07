@@ -24,6 +24,16 @@ function incrementVersion(version: string): string {
 }
 
 /**
+ * Slugify a string for markdown headers
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, ''); // Strip non-alphanumeric except dashes
+}
+
+/**
  * Generate markdown from rules
  */
 function generateMarkdown(sections: Section[], metadata: Metadata): string {
@@ -47,13 +57,14 @@ function generateMarkdown(sections: Section[], metadata: Metadata): string {
 
   // Generate TOC
   sections.forEach((section) => {
-    md += `${section.number}. [${section.title}](#${section.number}-${section.title
-      .toLowerCase()
-      .replace(/\s+/g, '-')}) (${section.impact})\n`;
+    md += `${section.number}. [${section.title}](#${section.number}-${slugify(
+      section.title
+    )}) (${section.impact})\n`;
     section.rules.forEach((rule) => {
-      md += `   - ${rule.id} [${rule.title}](#${rule.id.replace('.', '')}-${rule.title
-        .toLowerCase()
-        .replace(/\s+/g, '-')})\n`;
+      md += `   - ${rule.id} [${rule.title}](#${rule.id.replace(
+        '.',
+        ''
+      )}-${slugify(rule.title)})\n`;
     });
   });
 
@@ -77,7 +88,7 @@ function generateMarkdown(sections: Section[], metadata: Metadata): string {
       md += `**\n\n`;
 
       if (rule.tags && rule.tags.length > 0) {
-        md += `*Tags: ${rule.tags.join(', ')}*\n\n`;
+        md += `_Tags: ${rule.tags.join(', ')}_\n\n`;
       }
 
       md += `${rule.explanation}\n\n`;

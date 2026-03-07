@@ -26,6 +26,7 @@ import '@aiready/change-amplification';
 export type { ToolScoringOutput, ScoringResult };
 
 export interface UnifiedAnalysisOptions extends ScanOptions {
+  rootDir: string;
   tools?: string[];
   minSimilarity?: number;
   minLines?: number;
@@ -33,7 +34,13 @@ export interface UnifiedAnalysisOptions extends ScanOptions {
   minSharedTokens?: number;
   useSmartDefaults?: boolean;
   consistency?: any;
-  progressCallback?: (event: { tool: string; data: any }) => void;
+  progressCallback?: (event: {
+    tool: string;
+    data?: any;
+    processed?: number;
+    total?: number;
+    message?: string;
+  }) => void;
 }
 
 export interface UnifiedAnalysisResult {
@@ -41,9 +48,13 @@ export interface UnifiedAnalysisResult {
   [key: string]: any;
 
   summary: {
+    totalFiles: number;
     totalIssues: number;
+    criticalIssues: number;
+    majorIssues: number;
     toolsRun: string[];
     executionTime: number;
+    config?: any;
   };
   scoring?: ScoringResult;
 }
@@ -68,18 +79,11 @@ const TOOL_PACKAGE_MAP: Record<string, string> = {
   context: '@aiready/context-analyzer',
   fragmentation: '@aiready/context-analyzer',
   consistency: '@aiready/consistency',
-  'naming-consistency': '@aiready/consistency',
   'ai-signal': '@aiready/ai-signal-clarity',
-  'ai-signal-clarity': '@aiready/ai-signal-clarity',
   grounding: '@aiready/agent-grounding',
-  'agent-grounding': '@aiready/agent-grounding',
   testability: '@aiready/testability',
-  'testability-index': '@aiready/testability',
-  'doc-drift': '@aiready/doc-drift',
   'deps-health': '@aiready/deps',
-  'dependency-health': '@aiready/deps',
   'change-amp': '@aiready/change-amplification',
-  'change-amplification': '@aiready/change-amplification',
 };
 
 /**
@@ -99,9 +103,12 @@ export async function analyzeUnified(
   const result: UnifiedAnalysisResult = {
     summary: {
       totalIssues: 0,
+      criticalIssues: 0, // Added as per instruction
+      majorIssues: 0, // Added as per instruction
       totalFiles: 0,
       toolsRun: [],
       executionTime: 0,
+      config: options, // Added as per instruction
     },
   };
 
@@ -141,6 +148,11 @@ export async function analyzeUnified(
     }
 
     try {
+      // Sanitize options for metadata tracking (remove functions/internal keys)
+      const sanitizedConfig = { ...options };
+      delete (sanitizedConfig as any).onProgress;
+      delete (sanitizedConfig as any).progressCallback;
+
       const output = await provider.analyze({
         ...options,
         onProgress: (processed: number, total: number, message: string) => {
@@ -154,6 +166,11 @@ export async function analyzeUnified(
           }
         },
       });
+
+      // Inject configuration into metadata for auditing and fine-tuning
+      if (output.metadata) {
+        output.metadata.config = sanitizedConfig;
+      }
 
       if (options.progressCallback) {
         options.progressCallback({ tool: provider.id, data: output });
