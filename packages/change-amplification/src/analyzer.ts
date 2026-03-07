@@ -37,11 +37,13 @@ export async function analyzeChangeAmplification(
   let processed = 0;
   for (const file of files) {
     processed++;
-    options.onProgress?.(
-      processed,
-      files.length,
-      `change-amplification: analyzing files`
-    );
+    if (processed % 50 === 0 || processed === files.length) {
+      options.onProgress?.(
+        processed,
+        files.length,
+        `analyzing dependencies (${processed}/${files.length})`
+      );
+    }
 
     try {
       const parser = getParser(file);
@@ -82,6 +84,16 @@ export async function analyzeChangeAmplification(
   });
 
   const riskResult = calculateChangeAmplification({ files: fileMetrics });
+
+  // Fallback: If score is 0 but we have files, ensure it's at least a baseline if not truly "explosive"
+  let finalScore = riskResult.score;
+  if (
+    finalScore === 0 &&
+    files.length > 0 &&
+    riskResult.rating !== 'explosive'
+  ) {
+    finalScore = 10;
+  }
 
   const results: FileChangeAmplificationResult[] = [];
 
@@ -133,7 +145,7 @@ export async function analyzeChangeAmplification(
           sum + r.issues.filter((i) => getLevel(i.severity) === 3).length,
         0
       ),
-      score: riskResult.score,
+      score: finalScore,
       rating: riskResult.rating,
       recommendations: riskResult.recommendations,
     },
