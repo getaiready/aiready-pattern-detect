@@ -212,121 +212,157 @@ export const COMMON_FINE_TUNING_OPTIONS = [
 
 export const GLOBAL_SCAN_OPTIONS = [...GLOBAL_INFRA_OPTIONS];
 
+/**
+ * Base configuration for any AIReady tool
+ */
+export interface BaseToolConfig {
+  /** Whether this tool is enabled for the scan */
+  enabled?: boolean;
+  /** Custom weight for overall score calculation (sum should be 100) */
+  scoreWeight?: number;
+  /** Catch-all for any other tool-specific options */
+  [key: string]: any;
+}
+
+/**
+ * Configuration for the pattern-detect tool (semantic duplicate detection)
+ */
+export interface PatternDetectConfig extends BaseToolConfig {
+  /** Similarity threshold (0-1). Higher = more strict. */
+  minSimilarity?: number;
+  /** Minimum lines to consider a block */
+  minLines?: number;
+  /** Batch size for parallel processing */
+  batchSize?: number;
+  /** Use approximate matching engine for faster results on large repos */
+  approx?: boolean;
+  /** Minimum tokens shared between blocks for candidates */
+  minSharedTokens?: number;
+  /** Maximum number of candidates to compare per block */
+  maxCandidatesPerBlock?: number;
+}
+
+/**
+ * Configuration for the context-analyzer tool (fragmentation and budget)
+ */
+export interface ContextAnalyzerConfig extends BaseToolConfig {
+  /** Maximum directory depth to traverse */
+  maxDepth?: number;
+  /** Maximum tokens allowed per context window */
+  maxContextBudget?: number;
+  /** Minimum cohesion score required (0-1) */
+  minCohesion?: number;
+  /** Maximum fragmentation ratio allowed (0-1) */
+  maxFragmentation?: number;
+  /** Primary focus area for the analyzer */
+  focus?: 'fragmentation' | 'cohesion' | 'depth' | 'all';
+  /** Whether to include dependencies from node_modules */
+  includeNodeModules?: boolean;
+  /** Project-specific domain keywords for better inference */
+  domainKeywords?: string[];
+}
+
+/**
+ * Configuration for the naming-consistency tool
+ */
+export interface NamingConsistencyConfig extends BaseToolConfig {
+  /** Project-approved abbreviations */
+  acceptedAbbreviations?: string[];
+  /** Words that are allowed to be short (like 'id', 'db') */
+  shortWords?: string[];
+  /** Specific checks to disable */
+  disableChecks?: (
+    | 'single-letter'
+    | 'abbreviation'
+    | 'convention-mix'
+    | 'unclear'
+    | 'poor-naming'
+  )[];
+}
+
+/**
+ * Configuration for the ai-signal-clarity tool
+ */
+export interface AiSignalClarityConfig extends BaseToolConfig {
+  /** Detect unnamed constants */
+  checkMagicLiterals?: boolean;
+  /** Detect positional boolean arguments */
+  checkBooleanTraps?: boolean;
+  /** Detect generic names like 'temp', 'data' */
+  checkAmbiguousNames?: boolean;
+  /** Detect public exports missing JSDoc */
+  checkUndocumentedExports?: boolean;
+  /** Detect implicit state mutations */
+  checkImplicitSideEffects?: boolean;
+  /** Detect deeply nested callbacks */
+  checkDeepCallbacks?: boolean;
+}
+
+/**
+ * Consolidated AIReady configuration schema
+ */
 export interface AIReadyConfig {
-  // Global scan options
+  /** Global scan settings */
   scan?: {
+    /** Glob patterns to include */
     include?: string[];
+    /** Glob patterns to exclude */
     exclude?: string[];
-    tools?: string[]; // Which tools to run: ["patterns", "context", "consistency"]
+    /** List of tools to execute */
+    tools?: string[];
   };
 
-  // Tool-specific configurations
+  /** Tool-specific configurations */
   tools?: {
-    'pattern-detect'?: {
-      enabled?: boolean;
-      scoreWeight?: number;
-      minSimilarity?: number;
-      minLines?: number;
-      batchSize?: number;
-      approx?: boolean;
-      minSharedTokens?: number;
-      maxCandidatesPerBlock?: number;
-      streamResults?: boolean;
-      maxResults?: number;
-    };
-    'context-analyzer'?: {
-      enabled?: boolean;
-      scoreWeight?: number;
-      maxDepth?: number;
-      maxContextBudget?: number;
-      minCohesion?: number;
-      maxFragmentation?: number;
-      focus?: 'fragmentation' | 'cohesion' | 'depth' | 'all';
-      includeNodeModules?: boolean;
-      maxResults?: number;
-      // Domain inference configuration
-      domainKeywords?: string[]; // project-specific domain keywords (e.g., ['txn','transaction','cust'])
-      domainPatterns?: string[]; // regex strings to match domains (e.g., ['^ord(er)?$', '^(inv|invoice)$'])
-      pathDomainMap?: Record<string, string>; // map of path segment -> domain (e.g., {'orders': 'order'})
-    };
-    [ToolName.NamingConsistency]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
-      acceptedAbbreviations?: string[];
-      shortWords?: string[];
-      disableChecks?: (
-        | 'single-letter'
-        | 'abbreviation'
-        | 'convention-mix'
-        | 'unclear'
-        | 'poor-naming'
-      )[];
-    };
-    [ToolName.AiSignalClarity]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
-      checkMagicLiterals?: boolean;
-      checkBooleanTraps?: boolean;
-      checkAmbiguousNames?: boolean;
-      checkUndocumentedExports?: boolean;
-      checkImplicitSideEffects?: boolean;
-      checkDeepCallbacks?: boolean;
-      minSeverity?: string;
-    };
-    [ToolName.AgentGrounding]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
+    'pattern-detect'?: PatternDetectConfig;
+    'context-analyzer'?: ContextAnalyzerConfig;
+    [ToolName.NamingConsistency]?: NamingConsistencyConfig;
+    [ToolName.AiSignalClarity]?: AiSignalClarityConfig;
+    [ToolName.AgentGrounding]?: BaseToolConfig & {
       maxRecommendedDepth?: number;
       readmeStaleDays?: number;
-      additionalVagueNames?: string[];
     };
-    [ToolName.TestabilityIndex]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
+    [ToolName.TestabilityIndex]?: BaseToolConfig & {
       minCoverageRatio?: number;
       testPatterns?: string[];
     };
-    [ToolName.DocDrift]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
+    [ToolName.DocDrift]?: BaseToolConfig & {
       maxCommits?: number;
       staleMonths?: number;
     };
-    [ToolName.DependencyHealth]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
+    [ToolName.DependencyHealth]?: BaseToolConfig & {
       trainingCutoffYear?: number;
     };
-    [ToolName.ChangeAmplification]?: {
-      enabled?: boolean;
-      scoreWeight?: number;
-    };
-    [toolName: string]:
-      | {
-          enabled?: boolean;
-          scoreWeight?: number;
-          [key: string]: any;
-        }
-      | undefined;
+    [ToolName.ChangeAmplification]?: BaseToolConfig;
+    /** Support for custom/third-party tools */
+    [toolName: string]: BaseToolConfig | undefined;
   };
 
-  // Scoring configuration
+  /** Global scoring and threshold settings */
   scoring?: {
-    threshold?: number; // Minimum passing score
-    showBreakdown?: boolean; // Show detailed breakdown
-    compareBaseline?: string; // Path to baseline JSON
-    saveTo?: string; // Auto-save score to path
+    /** Minimum overall score required to pass CI/CD */
+    threshold?: number;
+    /** Detailed breakdown in terminal output */
+    showBreakdown?: boolean;
+    /** Comparison with a previous run */
+    compareBaseline?: string;
+    /** Auto-persist result to this path */
+    saveTo?: string;
   };
 
-  // Output preferences
+  /** Console and file output preferences */
   output?: {
+    /** Output format (console, json, html) */
     format?: 'console' | 'json' | 'html';
+    /** Target file for the full report */
     file?: string;
   };
 
-  // Visualizer preferences
+  /** Graph Visualizer preferences */
   visualizer?: {
+    /** Custom directory grouping levels */
     groupingDirs?: string[];
+    /** Performance constraints for large graphs */
     graph?: {
       maxNodes?: number;
       maxEdges?: number;

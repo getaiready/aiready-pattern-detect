@@ -1,7 +1,29 @@
 import type { DependencyNode, FileClassification } from './types';
 
 /**
+ * Constants for file classifications to avoid magic strings
+ */
+export const Classification = {
+  BARREL: 'barrel-export' as const,
+  TYPE_DEFINITION: 'type-definition' as const,
+  NEXTJS_PAGE: 'nextjs-page' as const,
+  LAMBDA_HANDLER: 'lambda-handler' as const,
+  SERVICE: 'service-file' as const,
+  EMAIL_TEMPLATE: 'email-template' as const,
+  PARSER: 'parser-file' as const,
+  COHESIVE_MODULE: 'cohesive-module' as const,
+  UTILITY_MODULE: 'utility-module' as const,
+  MIXED_CONCERNS: 'mixed-concerns' as const,
+  UNKNOWN: 'unknown' as const,
+};
+
+/**
  * Classify a file into a specific type for better analysis context
+ *
+ * @param node The dependency node representing the file
+ * @param cohesionScore The calculated cohesion score for the file
+ * @param domains The detected domains/concerns for the file
+ * @returns The determined file classification
  */
 export function classifyFile(
   node: DependencyNode,
@@ -10,74 +32,78 @@ export function classifyFile(
 ): FileClassification {
   // 1. Detect barrel exports (primarily re-exports)
   if (isBarrelExport(node)) {
-    return 'barrel-export';
+    return Classification.BARREL;
   }
 
   // 2. Detect type definition files
   if (isTypeDefinition(node)) {
-    return 'type-definition';
+    return Classification.TYPE_DEFINITION;
   }
 
   // 3. Detect Next.js App Router pages
   if (isNextJsPage(node)) {
-    return 'nextjs-page';
+    return Classification.NEXTJS_PAGE;
   }
 
   // 4. Detect Lambda handlers
   if (isLambdaHandler(node)) {
-    return 'lambda-handler';
+    return Classification.LAMBDA_HANDLER;
   }
 
   // 5. Detect Service files
   if (isServiceFile(node)) {
-    return 'service-file';
+    return Classification.SERVICE;
   }
 
   // 6. Detect Email templates
   if (isEmailTemplate(node)) {
-    return 'email-template';
+    return Classification.EMAIL_TEMPLATE;
   }
 
   // 7. Detect Parser/Transformer files
   if (isParserFile(node)) {
-    return 'parser-file';
+    return Classification.PARSER;
   }
 
   // 8. Detect Session/State management files
   if (isSessionFile(node)) {
     // If it has high cohesion, it's a cohesive module
-    if (cohesionScore >= 0.25 && domains.length <= 1) return 'cohesive-module';
-    return 'utility-module'; // Group with utility for now
+    if (cohesionScore >= 0.25 && domains.length <= 1)
+      return Classification.COHESIVE_MODULE;
+    return Classification.UTILITY_MODULE; // Group with utility for now
   }
 
   // 9. Detect Utility modules (multi-domain but functional purpose)
   if (isUtilityModule(node)) {
-    return 'utility-module';
+    return Classification.UTILITY_MODULE;
   }
 
   // 10. Detect Config/Schema files
   if (isConfigFile(node)) {
-    return 'cohesive-module';
+    return Classification.COHESIVE_MODULE;
   }
 
   // Cohesion and Domain heuristics
   if (domains.length <= 1 && domains[0] !== 'unknown') {
-    return 'cohesive-module';
+    return Classification.COHESIVE_MODULE;
   }
 
   if (domains.length > 1 && cohesionScore < 0.4) {
-    return 'mixed-concerns';
+    return Classification.MIXED_CONCERNS;
   }
 
   if (cohesionScore >= 0.7) {
-    return 'cohesive-module';
+    return Classification.COHESIVE_MODULE;
   }
 
-  return 'unknown';
+  return Classification.UNKNOWN;
 }
 
 /**
  * Detect if a file is a barrel export (index.ts)
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a barrel export
  */
 export function isBarrelExport(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -106,6 +132,9 @@ export function isBarrelExport(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is primarily type definitions
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be primarily types
  */
 export function isTypeDefinition(node: DependencyNode): boolean {
   const { file } = node;
@@ -132,6 +161,9 @@ export function isTypeDefinition(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a utility module
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a utility module
  */
 export function isUtilityModule(node: DependencyNode): boolean {
   const { file } = node;
@@ -155,6 +187,9 @@ export function isUtilityModule(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a Lambda/API handler
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a Lambda handler
  */
 export function isLambdaHandler(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -191,6 +226,9 @@ export function isLambdaHandler(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a service file
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a service file
  */
 export function isServiceFile(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -217,6 +255,9 @@ export function isServiceFile(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is an email template/layout
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be an email template
  */
 export function isEmailTemplate(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -254,6 +295,9 @@ export function isEmailTemplate(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a parser/transformer
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a parser
  */
 export function isParserFile(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -290,6 +334,9 @@ export function isParserFile(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a session/state management file
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a session/state file
  */
 export function isSessionFile(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -315,6 +362,9 @@ export function isSessionFile(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a configuration or schema file
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a config file
  */
 export function isConfigFile(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -348,6 +398,9 @@ export function isConfigFile(node: DependencyNode): boolean {
 
 /**
  * Detect if a file is a Next.js App Router page
+ *
+ * @param node The dependency node to check
+ * @returns True if the file appears to be a Next.js page
  */
 export function isNextJsPage(node: DependencyNode): boolean {
   const { file, exports } = node;
@@ -377,6 +430,11 @@ export function isNextJsPage(node: DependencyNode): boolean {
 
 /**
  * Adjust cohesion score based on file classification
+ *
+ * @param baseCohesion The initial cohesion score
+ * @param classification The file classification
+ * @param node Optional dependency node for further context
+ * @returns The adjusted cohesion score
  */
 export function adjustCohesionForClassification(
   baseCohesion: number,
@@ -384,13 +442,13 @@ export function adjustCohesionForClassification(
   node?: DependencyNode
 ): number {
   switch (classification) {
-    case 'barrel-export':
+    case Classification.BARREL:
       return 1;
-    case 'type-definition':
+    case Classification.TYPE_DEFINITION:
       return 1;
-    case 'nextjs-page':
+    case Classification.NEXTJS_PAGE:
       return 1;
-    case 'utility-module': {
+    case Classification.UTILITY_MODULE: {
       if (
         node &&
         hasRelatedExportNames(
@@ -401,17 +459,17 @@ export function adjustCohesionForClassification(
       }
       return Math.max(0.75, Math.min(1, baseCohesion + 0.35));
     }
-    case 'service-file':
+    case Classification.SERVICE:
       return Math.max(0.72, Math.min(1, baseCohesion + 0.3));
-    case 'lambda-handler':
+    case Classification.LAMBDA_HANDLER:
       return Math.max(0.75, Math.min(1, baseCohesion + 0.35));
-    case 'email-template':
+    case Classification.EMAIL_TEMPLATE:
       return Math.max(0.72, Math.min(1, baseCohesion + 0.3));
-    case 'parser-file':
+    case Classification.PARSER:
       return Math.max(0.7, Math.min(1, baseCohesion + 0.3));
-    case 'cohesive-module':
+    case Classification.COHESIVE_MODULE:
       return Math.max(baseCohesion, 0.7);
-    case 'mixed-concerns':
+    case Classification.MIXED_CONCERNS:
       return baseCohesion;
     default:
       return Math.min(1, baseCohesion + 0.1);
@@ -420,6 +478,9 @@ export function adjustCohesionForClassification(
 
 /**
  * Check if export names suggest related functionality
+ *
+ * @param exportNames List of exported names
+ * @returns True if names appear related
  */
 function hasRelatedExportNames(exportNames: string[]): boolean {
   if (exportNames.length < 2) return true;
@@ -470,26 +531,30 @@ function hasRelatedExportNames(exportNames: string[]): boolean {
 
 /**
  * Adjust fragmentation score based on file classification
+ *
+ * @param baseFragmentation The initial fragmentation score
+ * @param classification The file classification
+ * @returns The adjusted fragmentation score
  */
 export function adjustFragmentationForClassification(
   baseFragmentation: number,
   classification: FileClassification
 ): number {
   switch (classification) {
-    case 'barrel-export':
+    case Classification.BARREL:
       return 0;
-    case 'type-definition':
+    case Classification.TYPE_DEFINITION:
       return 0;
-    case 'utility-module':
-    case 'service-file':
-    case 'lambda-handler':
-    case 'email-template':
-    case 'parser-file':
-    case 'nextjs-page':
+    case Classification.UTILITY_MODULE:
+    case Classification.SERVICE:
+    case Classification.LAMBDA_HANDLER:
+    case Classification.EMAIL_TEMPLATE:
+    case Classification.PARSER:
+    case Classification.NEXTJS_PAGE:
       return baseFragmentation * 0.2;
-    case 'cohesive-module':
+    case Classification.COHESIVE_MODULE:
       return baseFragmentation * 0.3;
-    case 'mixed-concerns':
+    case Classification.MIXED_CONCERNS:
       return baseFragmentation;
     default:
       return baseFragmentation * 0.7;

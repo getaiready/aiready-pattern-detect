@@ -266,11 +266,21 @@ export async function scanAction(directory: string, options: ScanOptions) {
           },
         });
 
+        const allIssues: any[] = [];
+        for (const toolId of results.summary.toolsRun) {
+          if (results[toolId]?.results) {
+            results[toolId].results.forEach((fileRes: any) => {
+              if (fileRes.issues) {
+                allIssues.push(...fileRes.issues);
+              }
+            });
+          }
+        }
+
         const modelId = options.model || 'claude-3-5-sonnet';
-        const modelPreset = getModelPreset(modelId);
         const roi = (await import('@aiready/core')).calculateBusinessROI({
           tokenWaste: unifiedBudget.wastedTokens.total,
-          issues: results.results.flatMap((r: any) => r.issues || []),
+          issues: allIssues,
           modelId: modelId,
         });
 

@@ -1,12 +1,28 @@
 import { ToolName } from './types/schema';
 
 /**
- * AI Readiness Scoring System
- *
- * Provides dynamic, composable scoring across multiple analysis tools.
- * Each tool contributes a 0-100 score with configurable weights.
+ * Priority levels for actionable recommendations
  */
+export enum RecommendationPriority {
+  High = 'high',
+  Medium = 'medium',
+  Low = 'low',
+}
 
+/**
+ * AI Readiness Rating categories
+ */
+export enum ReadinessRating {
+  Excellent = 'Excellent',
+  Good = 'Good',
+  Fair = 'Fair',
+  NeedsWork = 'Needs Work',
+  Critical = 'Critical',
+}
+
+/**
+ * Output structure for a single tool's scoring analysis
+ */
 export interface ToolScoringOutput {
   /** Unique tool identifier (e.g., "pattern-detect") */
   toolName: string;
@@ -22,25 +38,34 @@ export interface ToolScoringOutput {
 
   /** Factors that influenced the score */
   factors: Array<{
+    /** Human-readable name of the factor */
     name: string;
-    impact: number; // +/- points contribution
+    /** Points contribution (positive or negative) */
+    impact: number;
+    /** Explanation of the factor's impact */
     description: string;
   }>;
 
   /** Actionable recommendations with estimated impact */
   recommendations: Array<{
+    /** The recommended action to take */
     action: string;
-    estimatedImpact: number; // +points if fixed
-    priority: 'high' | 'medium' | 'low';
+    /** Potential points increase if implemented */
+    estimatedImpact: number;
+    /** Implementation priority */
+    priority: RecommendationPriority | 'high' | 'medium' | 'low';
   }>;
 }
 
+/**
+ * Consolidated scoring result across all tools
+ */
 export interface ScoringResult {
   /** Overall AI Readiness Score (0-100) */
   overall: number;
 
-  /** Rating category */
-  rating: 'Excellent' | 'Good' | 'Fair' | 'Needs Work' | 'Critical';
+  /** Rating category representing the overall readiness */
+  rating: ReadinessRating | string;
 
   /** Timestamp of score calculation */
   timestamp: string;
@@ -48,28 +73,34 @@ export interface ScoringResult {
   /** Tools that contributed to this score */
   toolsUsed: string[];
 
-  /** Breakdown by tool */
+  /** Breakdown by individual tool */
   breakdown: ToolScoringOutput[];
 
-  /** Calculation details */
+  /** Internal calculation details for transparency */
   calculation: {
+    /** Textual representation of the calculation formula */
     formula: string;
+    /** Weights applied to each tool */
     weights: Record<string, number>;
+    /** Simplified normalized formula output */
     normalized: string;
   };
 }
 
+/**
+ * Configuration options for the scoring system
+ */
 export interface ScoringConfig {
-  /** Minimum passing score (exit code 1 if below) */
+  /** Minimum passing score (CLI will exit with non-zero if below) */
   threshold?: number;
 
-  /** Show detailed breakdown in output */
+  /** Whether to show the detailed tool-by-tool breakdown */
   showBreakdown?: boolean;
 
-  /** Path to baseline JSON for comparison */
+  /** Path to a baseline report JSON for trend comparison */
   compareBaseline?: string;
 
-  /** Auto-save score to this path */
+  /** Target file path to persist the calculated score */
   saveTo?: string;
 }
 
@@ -151,7 +182,10 @@ export const SIZE_ADJUSTED_THRESHOLDS: Record<string, number> = {
 };
 
 /**
- * Determine project size tier from file count
+ * Determine project size tier based on the total number of files
+ *
+ * @param fileCount Total number of files in the project
+ * @returns A string identifier for the project size tier (xs, small, medium, large, enterprise)
  */
 export function getProjectSizeTier(
   fileCount: number
@@ -164,7 +198,11 @@ export function getProjectSizeTier(
 }
 
 /**
- * Get the recommended minimum threshold for a project
+ * Calculate the recommended minimum AI readiness threshold for a project
+ *
+ * @param fileCount Total number of files in the project
+ * @param modelTier The model context tier targeted (compact, standard, extended, frontier)
+ * @returns The recommended score threshold (0-100)
  */
 export function getRecommendedThreshold(
   fileCount: number,
@@ -178,14 +216,22 @@ export function getRecommendedThreshold(
 }
 
 /**
- * Normalize tool name from shorthand to canonical name
+ * Normalize a tool name from a shorthand or alias to its canonical ID
+ *
+ * @param shortName The tool shorthand or alias name
+ * @returns The canonical tool ID
  */
 export function normalizeToolName(shortName: string): string {
   return TOOL_NAME_MAP[shortName.toLowerCase()] || shortName;
 }
 
 /**
- * Get tool weight
+ * Retrieve the weight for a specific tool, considering overrides
+ *
+ * @param toolName The canonical tool ID
+ * @param toolConfig Optional configuration for the tool containing a weight
+ * @param cliOverride Optional weight override from the CLI
+ * @returns The weight to be used for this tool in overall scoring
  */
 export function getToolWeight(
   toolName: string,
@@ -198,7 +244,10 @@ export function getToolWeight(
 }
 
 /**
- * Parse weight string from CLI
+ * Parse a comma-separated weight string (e.g. "patterns:30,context:10")
+ *
+ * @param weightStr The raw weight string from the CLI or config
+ * @returns A Map of tool IDs to their parsed weights
  */
 export function parseWeightString(weightStr?: string): Map<string, number> {
   const weights = new Map<string, number>();
@@ -206,10 +255,10 @@ export function parseWeightString(weightStr?: string): Map<string, number> {
 
   const pairs = weightStr.split(',');
   for (const pair of pairs) {
-    const [toolShortName, weightStr] = pair.split(':');
-    if (toolShortName && weightStr) {
+    const [toolShortName, weightValueStr] = pair.split(':');
+    if (toolShortName && weightValueStr) {
       const toolName = normalizeToolName(toolShortName.trim());
-      const weight = parseInt(weightStr.trim(), 10);
+      const weight = parseInt(weightValueStr.trim(), 10);
       if (!isNaN(weight) && weight > 0) {
         weights.set(toolName, weight);
       }
@@ -219,7 +268,12 @@ export function parseWeightString(weightStr?: string): Map<string, number> {
 }
 
 /**
- * Calculate overall AI Readiness Score
+ * Calculate the overall consolidated AI Readiness Score
+ *
+ * @param toolOutputs Map of tool IDs to their individual scoring outputs
+ * @param config Optional global configuration
+ * @param cliWeights Optional weight overrides from the CLI
+ * @returns Consolidate ScoringResult including overall score and rating
  */
 export function calculateOverallScore(
   toolOutputs: Map<string, ToolScoringOutput>,
@@ -282,59 +336,78 @@ export function calculateOverallScore(
 
 /**
  * Convert numeric score to rating category
+ *
+ * @param score The numerical AI readiness score (0-100)
+ * @returns The corresponding ReadinessRating category
  */
-export function getRating(score: number): ScoringResult['rating'] {
-  if (score >= 90) return 'Excellent';
-  if (score >= 75) return 'Good';
-  if (score >= 60) return 'Fair';
-  if (score >= 40) return 'Needs Work';
-  return 'Critical';
+export function getRating(score: number): ReadinessRating {
+  if (score >= 90) return ReadinessRating.Excellent;
+  if (score >= 75) return ReadinessRating.Good;
+  if (score >= 60) return ReadinessRating.Fair;
+  if (score >= 40) return ReadinessRating.NeedsWork;
+  return ReadinessRating.Critical;
 }
 
 /**
  * Convert score to rating with project-size awareness.
+ *
+ * @param score The numerical AI readiness score
+ * @param fileCount Total number of files in the project
+ * @param modelTier The model context tier being targeted
+ * @returns The size-adjusted ReadinessRating
  */
 export function getRatingWithContext(
   score: number,
   fileCount: number,
   modelTier: ModelContextTier = 'standard'
-): ScoringResult['rating'] {
+): ReadinessRating {
   const threshold = getRecommendedThreshold(fileCount, modelTier);
   const normalized = score - threshold + 70;
   return getRating(normalized);
 }
 
 /**
- * Get rating display properties
+ * Get rating display properties (emoji and color)
+ *
+ * @param rating The readiness rating category
+ * @returns Object containing display emoji and color string
  */
-export function getRatingDisplay(rating: ScoringResult['rating']): {
+export function getRatingDisplay(rating: ReadinessRating | string): {
   emoji: string;
   color: string;
 } {
   switch (rating) {
-    case 'Excellent':
+    case ReadinessRating.Excellent:
       return { emoji: '✅', color: 'green' };
-    case 'Good':
+    case ReadinessRating.Good:
       return { emoji: '👍', color: 'blue' };
-    case 'Fair':
+    case ReadinessRating.Fair:
       return { emoji: '⚠️', color: 'yellow' };
-    case 'Needs Work':
+    case ReadinessRating.NeedsWork:
       return { emoji: '🔨', color: 'orange' };
-    case 'Critical':
+    case ReadinessRating.Critical:
       return { emoji: '❌', color: 'red' };
+    default:
+      return { emoji: '❓', color: 'gray' };
   }
 }
 
 /**
- * Format score for display
+ * Format score for human-readable console display
+ *
+ * @param result The consolidated scoring result
+ * @returns Formatted string for display
  */
 export function formatScore(result: ScoringResult): string {
-  const { emoji } = getRatingDisplay(result.rating);
+  const { emoji } = getRatingDisplay(result.rating as ReadinessRating);
   return `${result.overall}/100 (${result.rating}) ${emoji}`;
 }
 
 /**
- * Format individual tool score for display
+ * Format individual tool score for detailed console display
+ *
+ * @param output The scoring output for a single tool
+ * @returns Formatted string with factors and recommendations
  */
 export function formatToolScore(output: ToolScoringOutput): string {
   let result = `  Score: ${output.score}/100\n\n`;
@@ -351,12 +424,13 @@ export function formatToolScore(output: ToolScoringOutput): string {
   if (output.recommendations && output.recommendations.length > 0) {
     result += `  Recommendations:\n`;
     output.recommendations.forEach((rec, i) => {
-      const priorityIcon =
-        rec.priority === 'high'
-          ? '🔴'
-          : rec.priority === 'medium'
-            ? '🟡'
-            : '🔵';
+      let priorityIcon = '🔵';
+      const prio = rec.priority as string;
+      if (prio === RecommendationPriority.High || prio === 'high')
+        priorityIcon = '🔴';
+      else if (prio === RecommendationPriority.Medium || prio === 'medium')
+        priorityIcon = '🟡';
+
       result += `    ${i + 1}. ${priorityIcon} ${rec.action}\n`;
       result += `       Impact: +${rec.estimatedImpact} points\n\n`;
     });

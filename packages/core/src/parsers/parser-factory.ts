@@ -19,14 +19,19 @@ import { CSharpParser } from './csharp-parser';
 import { GoParser } from './go-parser';
 
 /**
- * Factory for creating and managing language parsers
+ * Factory for creating and managing language parsers.
+ *
+ * Supports both singleton usage and multiple instances for test isolation.
  */
 export class ParserFactory {
   private static instance: ParserFactory;
   private parsers: Map<Language, LanguageParser>;
   private extensionMap: Map<string, Language>;
 
-  private constructor() {
+  /**
+   * Create a new ParserFactory instance
+   */
+  constructor() {
     this.parsers = new Map();
     this.extensionMap = new Map(
       Object.entries(LANGUAGE_EXTENSIONS).map(([ext, lang]) => [ext, lang])
@@ -41,7 +46,9 @@ export class ParserFactory {
   }
 
   /**
-   * Get singleton instance
+   * Get the global singleton instance
+   *
+   * @returns The singleton ParserFactory instance
    */
   public static getInstance(): ParserFactory {
     if (!ParserFactory.instance) {

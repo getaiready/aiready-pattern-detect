@@ -1,4 +1,4 @@
-import { createRemediation } from '../lib/db/remediation';
+import { createRemediation } from './remediation';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function seedInitialRemediations(repoId: string, userId: string) {
