@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/app/api/auth/[...nextauth]/route';
 import {
   createRepository,
@@ -184,6 +185,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await deleteRepository(repoId);
+    revalidatePath('/dashboard');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting repository:', error);

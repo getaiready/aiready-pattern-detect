@@ -15,27 +15,29 @@ export function useDashboardData(
   const [uploadingRepoId, setUploadingRepoId] = useState<string | null>(null);
   const [scanningRepoId, setScanningRepoId] = useState<string | null>(null);
   const [deletingRepoId, setDeletingRepoId] = useState<string | null>(null);
+  const [deletedRepoIds, setDeletedRepoIds] = useState<Set<string>>(new Set());
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Filter by deletedRepoIds to handle eventual consistency
+    const filtered = initialRepos.filter((r) => !deletedRepoIds.has(r.id));
     if (currentTeamId === 'personal') {
-      setRepos(initialRepos);
+      setRepos(filtered);
     } else {
       fetchTeamRepos(currentTeamId);
     }
-  }, [currentTeamId, initialRepos]);
+  }, [currentTeamId, initialRepos, deletedRepoIds]);
 
   async function fetchTeamRepos(teamId: string) {
     try {
       const res = await fetch(`/api/repos?teamId=${teamId}`);
       if (res.ok) {
         const data = await res.json();
-        setRepos(
-          data.repos.map((r: any) => ({
-            ...r,
-            latestAnalysis: r.latestAnalysis || null,
-          }))
-        );
+        const fetchedRepos = data.repos.map((r: any) => ({
+          ...r,
+          latestAnalysis: r.latestAnalysis || null,
+        }));
+        setRepos(fetchedRepos.filter((r: any) => !deletedRepoIds.has(r.id)));
       }
     } catch (err) {
       console.error('Failed to fetch team repos:', err);
@@ -67,10 +69,12 @@ export function useDashboardData(
         if (!res.ok) return;
 
         const data = await res.json();
-        const updatedRepos: RepoWithAnalysis[] = data.repos.map((r: any) => ({
-          ...r,
-          latestAnalysis: r.latestAnalysis || null,
-        }));
+        const updatedRepos: RepoWithAnalysis[] = data.repos
+          .map((r: any) => ({
+            ...r,
+            latestAnalysis: r.latestAnalysis || null,
+          }))
+          .filter((r: any) => !deletedRepoIds.has(r.id));
 
         // Determine who finished or failed
         const finishedIds: string[] = [];
@@ -197,6 +201,7 @@ export function useDashboardData(
     try {
       const res = await fetch(`/api/repos?id=${repoId}`, { method: 'DELETE' });
       if (res.ok) {
+        setDeletedRepoIds((prev) => new Set([...prev, repoId]));
         setRepos((prev) => prev.filter((r) => r.id !== repoId));
         toast.success('Repository deleted');
       } else {
