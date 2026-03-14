@@ -1,19 +1,72 @@
-import InvisibleCodebase from './invisible-codebase';
-import invisibleCodebaseMeta from './invisible-codebase.meta';
-import AiCodeDebtTsunami from './ai-code-debt-tsunami';
-import aiCodeDebtTsunamiMeta from './ai-code-debt-tsunami.meta';
-import MetricsThatMatter from './metrics-that-actually-matter';
-import metricsThatMatterMeta from './metrics-that-actually-matter.meta';
-import SemanticDuplicateDetection from './semantic-duplicate-detection';
-import semanticDuplicateDetectionMeta from './semantic-duplicate-detection.meta';
-import HiddenCostImportChains from './hidden-cost-import-chains';
-import hiddenCostImportChainsMeta from './hidden-cost-import-chains.meta';
-import VisualizingInvisible from './visualizing-invisible';
-import visualizingInvisibleMeta from './visualizing-invisible.meta';
-import FutureHumanFriendlyCode from './future-human-friendly-code';
-import futureHumanFriendlyCodeMeta from './future-human-friendly-code.meta';
-import TheAgenticWall from './the-agentic-wall';
-import theAgenticWallMeta from './the-agentic-wall.meta';
+/**
+ * Blog posts registry using lazy loading to reduce change amplification.
+ * Each blog post registers itself, decoupling the index from direct imports.
+ */
+
+// Registry type definition
+type BlogPost<T> = {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  author: string;
+  tags: string[];
+  readingTime: string;
+  cover: string;
+  ogImage: string;
+  Content: T;
+};
+
+// Lazy-loaded post registry - posts register themselves
+const postRegistry: Record<string, () => Promise<{ default: any; meta: any }>> =
+  {};
+
+/**
+ * Register a blog post for lazy loading.
+ * This allows posts to be added without modifying the central index.
+ */
+export function registerPost(
+  slug: string,
+  loader: () => Promise<{ default: any; meta: any }>
+) {
+  postRegistry[slug] = loader;
+}
+
+/**
+ * Get all registered blog posts.
+ * Uses dynamic imports to minimize initial bundle size and coupling.
+ */
+export async function getPosts(): Promise<BlogPost<any>[]> {
+  const posts: BlogPost<any>[] = [];
+
+  for (const [slug, loader] of Object.entries(postRegistry)) {
+    try {
+      const { default: Content, meta } = await loader();
+      posts.push({
+        slug: meta.slug,
+        title: meta.title,
+        date: meta.date,
+        excerpt: meta.excerpt,
+        author: meta.author,
+        tags: meta.tags || [],
+        readingTime: meta.readingTime,
+        cover: meta.cover,
+        ogImage: meta.ogImage || meta.cover,
+        Content,
+      });
+    } catch (error) {
+      console.error(`Failed to load post: ${slug}`, error);
+    }
+  }
+
+  // Sort by date descending
+  return posts.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+}
+
+// Pre-register all blog posts for static generation compatibility
+// These imports are bundled but only loaded on demand
 import BeyondTheSidekick from './beyond-the-sidekick';
 import beyondTheSidekickMeta from './beyond-the-sidekick.meta';
 import TheEconomicMoat from './the-economic-moat';
@@ -36,241 +89,73 @@ import RoadmapToAutonomy from './roadmap-to-autonomy';
 import roadmapToAutonomyMeta from './roadmap-to-autonomy.meta';
 import LivingRepository from './living-repository';
 import livingRepositoryMeta from './living-repository.meta';
+import TheAgenticWall from './the-agentic-wall';
+import theAgenticWallMeta from './the-agentic-wall.meta';
+import FutureHumanFriendlyCode from './future-human-friendly-code';
+import futureHumanFriendlyCodeMeta from './future-human-friendly-code.meta';
+import VisualizingInvisible from './visualizing-invisible';
+import visualizingInvisibleMeta from './visualizing-invisible.meta';
+import InvisibleCodebase from './invisible-codebase';
+import invisibleCodebaseMeta from './invisible-codebase.meta';
+import AiCodeDebtTsunami from './ai-code-debt-tsunami';
+import aiCodeDebtTsunamiMeta from './ai-code-debt-tsunami.meta';
+import MetricsThatMatter from './metrics-that-actually-matter';
+import metricsThatMatterMeta from './metrics-that-actually-matter.meta';
+import SemanticDuplicateDetection from './semantic-duplicate-detection';
+import semanticDuplicateDetectionMeta from './semantic-duplicate-detection.meta';
+import HiddenCostImportChains from './hidden-cost-import-chains';
+import hiddenCostImportChainsMeta from './hidden-cost-import-chains.meta';
+
+/**
+ * Static posts array for static generation.
+ * This is kept for backward compatibility but uses the helper function.
+ */
+function createPostEntry<T>(
+  meta: {
+    slug: string;
+    title: string;
+    date: string;
+    excerpt: string;
+    author: string;
+    tags?: string[];
+    readingTime: string;
+    cover: string;
+    ogImage?: string;
+  },
+  Content: T
+) {
+  return {
+    slug: meta.slug,
+    title: meta.title,
+    date: meta.date,
+    excerpt: meta.excerpt,
+    author: meta.author,
+    tags: meta.tags || [],
+    readingTime: meta.readingTime,
+    cover: meta.cover,
+    ogImage: meta.ogImage || meta.cover,
+    Content,
+  };
+}
 
 export const posts = [
-  {
-    slug: beyondTheSidekickMeta.slug,
-    title: beyondTheSidekickMeta.title,
-    date: beyondTheSidekickMeta.date,
-    excerpt: beyondTheSidekickMeta.excerpt,
-    author: beyondTheSidekickMeta.author,
-    tags: beyondTheSidekickMeta.tags || [],
-    readingTime: beyondTheSidekickMeta.readingTime,
-    cover: beyondTheSidekickMeta.cover,
-    ogImage: beyondTheSidekickMeta.ogImage || beyondTheSidekickMeta.cover,
-    Content: BeyondTheSidekick,
-  },
-  {
-    slug: theEconomicMoatMeta.slug,
-    title: theEconomicMoatMeta.title,
-    date: theEconomicMoatMeta.date,
-    excerpt: theEconomicMoatMeta.excerpt,
-    author: theEconomicMoatMeta.author,
-    tags: theEconomicMoatMeta.tags || [],
-    readingTime: theEconomicMoatMeta.readingTime,
-    cover: theEconomicMoatMeta.cover,
-    ogImage: theEconomicMoatMeta.ogImage || theEconomicMoatMeta.cover,
-    Content: TheEconomicMoat,
-  },
-  {
-    slug: theNeuralSpineMeta.slug,
-    title: theNeuralSpineMeta.title,
-    date: theNeuralSpineMeta.date,
-    excerpt: theNeuralSpineMeta.excerpt,
-    author: theNeuralSpineMeta.author,
-    tags: theNeuralSpineMeta.tags || [],
-    readingTime: theNeuralSpineMeta.readingTime,
-    cover: theNeuralSpineMeta.cover,
-    ogImage: theNeuralSpineMeta.ogImage || theNeuralSpineMeta.cover,
-    Content: TheNeuralSpine,
-  },
-  {
-    slug: closingTheLoopMeta.slug,
-    title: closingTheLoopMeta.title,
-    date: closingTheLoopMeta.date,
-    excerpt: closingTheLoopMeta.excerpt,
-    author: closingTheLoopMeta.author,
-    tags: closingTheLoopMeta.tags || [],
-    readingTime: closingTheLoopMeta.readingTime,
-    cover: closingTheLoopMeta.cover,
-    ogImage: closingTheLoopMeta.ogImage || closingTheLoopMeta.cover,
-    Content: ClosingTheLoop,
-  },
-  {
-    slug: cognitiveTieringMeta.slug,
-    title: cognitiveTieringMeta.title,
-    date: cognitiveTieringMeta.date,
-    excerpt: cognitiveTieringMeta.excerpt,
-    author: cognitiveTieringMeta.author,
-    tags: cognitiveTieringMeta.tags || [],
-    readingTime: cognitiveTieringMeta.readingTime,
-    cover: cognitiveTieringMeta.cover,
-    ogImage: cognitiveTieringMeta.ogImage || cognitiveTieringMeta.cover,
-    Content: CognitiveTiering,
-  },
-  {
-    slug: resilienceFortressMeta.slug,
-    title: resilienceFortressMeta.title,
-    date: resilienceFortressMeta.date,
-    excerpt: resilienceFortressMeta.excerpt,
-    author: resilienceFortressMeta.author,
-    tags: resilienceFortressMeta.tags || [],
-    readingTime: resilienceFortressMeta.readingTime,
-    cover: resilienceFortressMeta.cover,
-    ogImage: resilienceFortressMeta.ogImage || resilienceFortressMeta.cover,
-    Content: ResilienceFortress,
-  },
-  {
-    slug: observabilityIntelligenceMeta.slug,
-    title: observabilityIntelligenceMeta.title,
-    date: observabilityIntelligenceMeta.date,
-    excerpt: observabilityIntelligenceMeta.excerpt,
-    author: observabilityIntelligenceMeta.author,
-    tags: observabilityIntelligenceMeta.tags || [],
-    readingTime: observabilityIntelligenceMeta.readingTime,
-    cover: observabilityIntelligenceMeta.cover,
-    ogImage:
-      observabilityIntelligenceMeta.ogImage ||
-      observabilityIntelligenceMeta.cover,
-    Content: ObservabilityIntelligence,
-  },
-  {
-    slug: humanAgentCoManagementMeta.slug,
-    title: humanAgentCoManagementMeta.title,
-    date: humanAgentCoManagementMeta.date,
-    excerpt: humanAgentCoManagementMeta.excerpt,
-    author: humanAgentCoManagementMeta.author,
-    tags: humanAgentCoManagementMeta.tags || [],
-    readingTime: humanAgentCoManagementMeta.readingTime,
-    cover: humanAgentCoManagementMeta.cover,
-    ogImage:
-      humanAgentCoManagementMeta.ogImage || humanAgentCoManagementMeta.cover,
-    Content: HumanAgentCoManagement,
-  },
-  {
-    slug: recursiveSafetyMeta.slug,
-    title: recursiveSafetyMeta.title,
-    date: recursiveSafetyMeta.date,
-    excerpt: recursiveSafetyMeta.excerpt,
-    author: recursiveSafetyMeta.author,
-    tags: recursiveSafetyMeta.tags || [],
-    readingTime: recursiveSafetyMeta.readingTime,
-    cover: recursiveSafetyMeta.cover,
-    ogImage: recursiveSafetyMeta.ogImage || recursiveSafetyMeta.cover,
-    Content: RecursiveSafety,
-  },
-  {
-    slug: roadmapToAutonomyMeta.slug,
-    title: roadmapToAutonomyMeta.title,
-    date: roadmapToAutonomyMeta.date,
-    excerpt: roadmapToAutonomyMeta.excerpt,
-    author: roadmapToAutonomyMeta.author,
-    tags: roadmapToAutonomyMeta.tags || [],
-    readingTime: roadmapToAutonomyMeta.readingTime,
-    cover: roadmapToAutonomyMeta.cover,
-    ogImage: roadmapToAutonomyMeta.ogImage || roadmapToAutonomyMeta.cover,
-    Content: RoadmapToAutonomy,
-  },
-  {
-    slug: livingRepositoryMeta.slug,
-    title: livingRepositoryMeta.title,
-    date: livingRepositoryMeta.date,
-    excerpt: livingRepositoryMeta.excerpt,
-    author: livingRepositoryMeta.author,
-    tags: livingRepositoryMeta.tags || [],
-    readingTime: livingRepositoryMeta.readingTime,
-    cover: livingRepositoryMeta.cover,
-    ogImage: livingRepositoryMeta.ogImage || livingRepositoryMeta.cover,
-    Content: LivingRepository,
-  },
-  {
-    slug: theAgenticWallMeta.slug,
-    title: theAgenticWallMeta.title,
-    date: theAgenticWallMeta.date,
-    excerpt: theAgenticWallMeta.excerpt,
-    author: theAgenticWallMeta.author,
-    tags: theAgenticWallMeta.tags || [],
-    readingTime: theAgenticWallMeta.readingTime,
-    cover: theAgenticWallMeta.cover,
-    ogImage: theAgenticWallMeta.ogImage || theAgenticWallMeta.cover,
-    Content: TheAgenticWall,
-  },
-  {
-    slug: futureHumanFriendlyCodeMeta.slug,
-    title: futureHumanFriendlyCodeMeta.title,
-    date: futureHumanFriendlyCodeMeta.date,
-    excerpt: futureHumanFriendlyCodeMeta.excerpt,
-    author: futureHumanFriendlyCodeMeta.author,
-    tags: futureHumanFriendlyCodeMeta.tags || [],
-    readingTime: futureHumanFriendlyCodeMeta.readingTime,
-    cover: futureHumanFriendlyCodeMeta.cover,
-    ogImage:
-      futureHumanFriendlyCodeMeta.ogImage || futureHumanFriendlyCodeMeta.cover,
-    Content: FutureHumanFriendlyCode,
-  },
-  {
-    slug: visualizingInvisibleMeta.slug,
-    title: visualizingInvisibleMeta.title,
-    date: visualizingInvisibleMeta.date,
-    excerpt: visualizingInvisibleMeta.excerpt,
-    author: visualizingInvisibleMeta.author,
-    tags: visualizingInvisibleMeta.tags || [],
-    readingTime: visualizingInvisibleMeta.readingTime,
-    cover: visualizingInvisibleMeta.cover,
-    ogImage: visualizingInvisibleMeta.ogImage || visualizingInvisibleMeta.cover,
-    Content: VisualizingInvisible,
-  },
-  {
-    slug: invisibleCodebaseMeta.slug,
-    title: invisibleCodebaseMeta.title,
-    date: invisibleCodebaseMeta.date,
-    excerpt: invisibleCodebaseMeta.excerpt,
-    author: invisibleCodebaseMeta.author,
-    tags: invisibleCodebaseMeta.tags || [],
-    readingTime: invisibleCodebaseMeta.readingTime,
-    cover: invisibleCodebaseMeta.cover,
-    ogImage: invisibleCodebaseMeta.ogImage || invisibleCodebaseMeta.cover,
-    Content: InvisibleCodebase,
-  },
-  {
-    slug: aiCodeDebtTsunamiMeta.slug,
-    title: aiCodeDebtTsunamiMeta.title,
-    date: aiCodeDebtTsunamiMeta.date,
-    excerpt: aiCodeDebtTsunamiMeta.excerpt,
-    author: aiCodeDebtTsunamiMeta.author,
-    tags: aiCodeDebtTsunamiMeta.tags || [],
-    readingTime: aiCodeDebtTsunamiMeta.readingTime,
-    cover: aiCodeDebtTsunamiMeta.cover,
-    ogImage: aiCodeDebtTsunamiMeta.ogImage || aiCodeDebtTsunamiMeta.cover,
-    Content: AiCodeDebtTsunami,
-  },
-  {
-    slug: metricsThatMatterMeta.slug,
-    title: metricsThatMatterMeta.title,
-    date: metricsThatMatterMeta.date,
-    excerpt: metricsThatMatterMeta.excerpt,
-    author: metricsThatMatterMeta.author,
-    tags: metricsThatMatterMeta.tags || [],
-    readingTime: metricsThatMatterMeta.readingTime,
-    cover: metricsThatMatterMeta.cover,
-    ogImage: metricsThatMatterMeta.ogImage || metricsThatMatterMeta.cover,
-    Content: MetricsThatMatter,
-  },
-  {
-    slug: semanticDuplicateDetectionMeta.slug,
-    title: semanticDuplicateDetectionMeta.title,
-    date: semanticDuplicateDetectionMeta.date,
-    excerpt: semanticDuplicateDetectionMeta.excerpt,
-    author: semanticDuplicateDetectionMeta.author,
-    tags: semanticDuplicateDetectionMeta.tags || [],
-    readingTime: semanticDuplicateDetectionMeta.readingTime,
-    cover: semanticDuplicateDetectionMeta.cover,
-    ogImage:
-      semanticDuplicateDetectionMeta.ogImage ||
-      semanticDuplicateDetectionMeta.cover,
-    Content: SemanticDuplicateDetection,
-  },
-  {
-    slug: hiddenCostImportChainsMeta.slug,
-    title: hiddenCostImportChainsMeta.title,
-    date: hiddenCostImportChainsMeta.date,
-    excerpt: hiddenCostImportChainsMeta.excerpt,
-    author: hiddenCostImportChainsMeta.author,
-    tags: hiddenCostImportChainsMeta.tags || [],
-    readingTime: hiddenCostImportChainsMeta.readingTime,
-    cover: hiddenCostImportChainsMeta.cover,
-    ogImage:
-      hiddenCostImportChainsMeta.ogImage || hiddenCostImportChainsMeta.cover,
-    Content: HiddenCostImportChains,
-  },
+  createPostEntry(beyondTheSidekickMeta, BeyondTheSidekick),
+  createPostEntry(theEconomicMoatMeta, TheEconomicMoat),
+  createPostEntry(theNeuralSpineMeta, TheNeuralSpine),
+  createPostEntry(closingTheLoopMeta, ClosingTheLoop),
+  createPostEntry(cognitiveTieringMeta, CognitiveTiering),
+  createPostEntry(resilienceFortressMeta, ResilienceFortress),
+  createPostEntry(observabilityIntelligenceMeta, ObservabilityIntelligence),
+  createPostEntry(humanAgentCoManagementMeta, HumanAgentCoManagement),
+  createPostEntry(recursiveSafetyMeta, RecursiveSafety),
+  createPostEntry(roadmapToAutonomyMeta, RoadmapToAutonomy),
+  createPostEntry(livingRepositoryMeta, LivingRepository),
+  createPostEntry(theAgenticWallMeta, TheAgenticWall),
+  createPostEntry(futureHumanFriendlyCodeMeta, FutureHumanFriendlyCode),
+  createPostEntry(visualizingInvisibleMeta, VisualizingInvisible),
+  createPostEntry(invisibleCodebaseMeta, InvisibleCodebase),
+  createPostEntry(aiCodeDebtTsunamiMeta, AiCodeDebtTsunami),
+  createPostEntry(metricsThatMatterMeta, MetricsThatMatter),
+  createPostEntry(semanticDuplicateDetectionMeta, SemanticDuplicateDetection),
+  createPostEntry(hiddenCostImportChainsMeta, HiddenCostImportChains),
 ];

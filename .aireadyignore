@@ -8,6 +8,13 @@ infra/cdk.out/**
 **/build/**
 **/out/**
 node_modules/**
-.git/**
 # keep .aiready reports
 !.aiready/**
+# Exclude marketing sites - not core aiready tools
+landing/**
+clawmore/**
+platform/**
+# Exclude action marketplace - separate distribution channel
+action-marketplace/**
+# Exclude vscode extension - separate distribution channel
+vscode-extension/**
