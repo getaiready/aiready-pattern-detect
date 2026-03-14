@@ -15,6 +15,7 @@ const meta = {
   readingTime: '6 min read',
   slug: 'recursive-safety',
   cover: '/agentic-shift-series-10.png',
+  ogImage: '',
   ogImage: '/agentic-shift-series-10.png',
 };
 

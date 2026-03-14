@@ -8,6 +8,7 @@ const meta = {
   readingTime: '6 min read',
   slug: 'living-repository',
   cover: '/agentic-shift-series-12.png',
+  ogImage: '',
   ogImage: '/agentic-shift-series-12.png',
 };
 
