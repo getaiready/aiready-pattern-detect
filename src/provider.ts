@@ -29,6 +29,7 @@ export const PatternDetectProvider: ToolProvider = {
           (sum, r) => sum + r.issues.length,
           0
         ),
+        duplicates: results.duplicates, // Keep the raw duplicates for score calculation
         clusters: results.clusters,
         config: Object.fromEntries(
           Object.entries(results.config).filter(
