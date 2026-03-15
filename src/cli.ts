@@ -4,13 +4,12 @@ import { Command } from 'commander';
 import {
   analyzePatterns,
   generateSummary,
-  detectDuplicatePatterns,
 } from './index';
-import type { PatternType, DuplicatePattern } from './detector';
-import { filterBySeverity, getSeverityLabel } from './context-rules';
+import type { PatternType } from './detector';
+import { filterBySeverity } from './context-rules';
 import chalk from 'chalk';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { dirname } from 'path';
 import {
   loadConfig,
   mergeConfigWithDefaults,
@@ -434,7 +433,7 @@ program
         })
         .slice(0, finalOptions.maxResults);
 
-      topDuplicates.forEach((dup, idx) => {
+      topDuplicates.forEach((dup) => {
         const severityBadge = getSeverityBadge(dup.severity);
 
         // Get relative file names for cleaner display

@@ -136,7 +136,7 @@ export async function getSmartDefaults(
   };
 
   const result: PatternDetectOptions = { ...defaults };
-  for (const [key, value] of Object.entries(defaults)) {
+  for (const key of Object.keys(defaults)) {
     if (
       key in userOptions &&
       userOptions[key as keyof PatternDetectOptions] !== undefined
@@ -188,7 +188,6 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     maxCandidatesPerBlock = 100,
     streamResults = false,
     severity = 'all',
-    includeTests = false,
     groupByFilePair = true,
     createClusters = true,
     minClusterTokenCost = 1000,
