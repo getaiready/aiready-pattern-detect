@@ -1,4 +1,4 @@
-import { Severity, getSeverityBadge, getSeverityValue } from '@aiready/core';
+import { getSeverityBadge, getSeverityValue } from '@aiready/core';
 
 /**
  * Get icon for pattern type
@@ -24,7 +24,7 @@ export function generateHTMLReport(results: any, summary?: any): string {
   const data = summary
     ? { results, summary, metadata: { version: '0.11.22' } }
     : results;
-  const { results: duplicates, summary: reportSummary, metadata } = data;
+  const { metadata } = data;
 
   return `<!DOCTYPE html>
 <html lang="en">
