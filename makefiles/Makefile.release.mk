@@ -25,9 +25,7 @@ CLAWMORE_DIR  := $(ROOT_DIR)/clawmore
 	release-landing release-landing-dev release-landing-prod \
 	release-platform release-vscode \
 	release-clawmore release-clawmore-dev release-clawmore-prod \
-	release-spoke-% release-help \
-	$(foreach t,patch minor major, \
-		version-landing-$(t) version-platform-$(t) version-vscode-$(t) version-clawmore-$(t))
+	release-spoke-% release-help
 
 ###############################################################################
 # Internal macros
@@ -102,22 +100,22 @@ release-spoke-%:
 
 version-landing-%: ## Bump landing version: version-landing-patch|minor|major
 	@$(call log_step,Bumping landing version ($*)...)
-	@cd $(LANDING_DIR) && npm version $* --no-git-tag-version
+	@npm --prefix $(LANDING_DIR) version $* --no-git-tag-version
 	@$(call log_success,landing bumped to $$(node -p "require('$(LANDING_DIR)/package.json').version"))
 
 version-platform-%: ## Bump platform version: version-platform-patch|minor|major
 	@$(call log_step,Bumping platform version ($*)...)
-	@cd $(PLATFORM_DIR) && npm version $* --no-git-tag-version
+	@npm --prefix $(PLATFORM_DIR) version $* --no-git-tag-version
 	@$(call log_success,platform bumped to $$(node -p "require('$(PLATFORM_DIR)/package.json').version"))
 
 version-vscode-%: ## Bump vscode-extension version: version-vscode-patch|minor|major
 	@$(call log_step,Bumping VS Code extension version ($*)...)
-	@cd $(EXTENSION_DIR) && npm version $* --no-git-tag-version
+	@npm --prefix $(EXTENSION_DIR) version $* --no-git-tag-version
 	@$(call log_success,vscode-extension bumped to $$(node -p "require('$(EXTENSION_DIR)/package.json').version"))
 
 version-clawmore-%: ## Bump clawmore version: version-clawmore-patch|minor|major
 	@$(call log_step,Bumping clawmore version ($*)...)
-	@cd $(CLAWMORE_DIR) && npm version $* --no-git-tag-version
+	@npm --prefix $(CLAWMORE_DIR) version $* --no-git-tag-version
 	@$(call log_success,clawmore bumped to $$(node -p "require('$(CLAWMORE_DIR)/package.json').version"))
 
 ###############################################################################
