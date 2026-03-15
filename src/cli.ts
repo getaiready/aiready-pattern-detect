@@ -191,7 +191,6 @@ program
     const {
       results,
       duplicates: rawDuplicates,
-      files,
       groups,
       clusters,
     } = await analyzePatterns(finalOptions);
