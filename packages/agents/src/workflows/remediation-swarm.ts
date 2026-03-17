@@ -1,5 +1,4 @@
 import { Agent } from '@mastra/core/agent';
-import { RefactorResultSchema } from '../refactor-agent';
 import { MCPAdapter } from '../tools/mcp-adapter';
 
 // Standard MCP server commands (configured for a standard Node environment)

@@ -27,7 +27,6 @@ export async function analyzeDocDrift(
   // Use core scanFiles which respects .gitignore recursively
   const files = await scanFiles(options);
   const issues: DocDriftIssue[] = [];
-  const staleMonths = options.staleMonths ?? 6;
   // const staleSeconds = staleMonths * 30 * 24 * 60 * 60; // Unused, removed
 
   let uncommentedExports = 0;
