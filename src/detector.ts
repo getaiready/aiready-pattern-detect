@@ -231,6 +231,28 @@ function calculateSimilarity(a: string, b: string): number {
 }
 
 /**
+ * Calculate heuristic confidence score for a duplicate detection.
+ * Considers similarity, block size, and structural match.
+ */
+function calculateConfidence(
+  similarity: number,
+  tokens: number,
+  lines: number
+): number {
+  // Base confidence is the similarity itself
+  let confidence = similarity;
+
+  // Boost confidence for larger blocks (less likely to be accidental)
+  if (lines > 20) confidence += 0.05;
+  if (tokens > 200) confidence += 0.05;
+
+  // Small blocks are noisier
+  if (lines < 5) confidence -= 0.1;
+
+  return Math.max(0, Math.min(1, confidence));
+}
+
+/**
  * Detect duplicate patterns across files
  *
  * @param fileContents - Array of file contents to analyze.
@@ -241,14 +263,31 @@ export async function detectDuplicatePatterns(
   fileContents: FileContent[],
   options: DetectionOptions
 ): Promise<DuplicatePattern[]> {
-  const { minSimilarity, minLines, streamResults, onProgress } = options;
+  const {
+    minSimilarity,
+    minLines,
+    streamResults,
+    onProgress,
+    excludePatterns = [],
+    confidenceThreshold = 0,
+    ignoreWhitelist = [],
+  } = options;
   const allBlocks: CodeBlock[] = [];
+
+  // Pre-compile exclude regexes
+  const excludeRegexes = excludePatterns.map((p) => new RegExp(p, 'i'));
 
   for (const { file, content } of fileContents) {
     const blocks = extractBlocks(file, content);
-    allBlocks.push(
-      ...blocks.filter((b) => b.endLine - b.startLine + 1 >= minLines)
-    );
+    for (const b of blocks) {
+      if (b.endLine - b.startLine + 1 < minLines) continue;
+
+      // Filter out blocks matching exclude patterns
+      const isExcluded = excludeRegexes.some((regex) => regex.test(b.code));
+      if (isExcluded) continue;
+
+      allBlocks.push(b);
+    }
   }
 
   const duplicates: DuplicatePattern[] = [];
@@ -287,11 +326,29 @@ export async function detectDuplicatePatterns(
 
       if (b1.file === b2.file) continue;
 
+      // Check ignore whitelist (file pairs)
+      const isWhitelisted = ignoreWhitelist.some((pattern) => {
+        return (
+          (b1.file.includes(pattern) && b2.file.includes(pattern)) ||
+          pattern === `${b1.file}::${b2.file}` ||
+          pattern === `${b2.file}::${b1.file}`
+        );
+      });
+      if (isWhitelisted) continue;
+
       const isPython2 = b2.file.toLowerCase().endsWith('.py');
       const norm2 = normalizeCode(b2.code, isPython2);
       const sim = calculateSimilarity(norm1, norm2);
 
       if (sim >= minSimilarity) {
+        const confidence = calculateConfidence(
+          sim,
+          b1.tokens,
+          b1.endLine - b1.startLine + 1
+        );
+
+        if (confidence < confidenceThreshold) continue;
+
         const { severity, reason, suggestion, matchedRule } = calculateSeverity(
           b1.file,
           b2.file,
@@ -310,6 +367,7 @@ export async function detectDuplicatePatterns(
           code1: b1.code,
           code2: b2.code,
           similarity: sim,
+          confidence,
           patternType: b1.patternType,
           tokenCost: b1.tokens + b2.tokens,
           severity: severity as Severity,
@@ -321,7 +379,7 @@ export async function detectDuplicatePatterns(
         duplicates.push(dup);
         if (streamResults)
           console.log(
-            `[DUPLICATE] ${dup.file1}:${dup.line1} <-> ${dup.file2}:${dup.line2} (${Math.round(sim * 100)}%)`
+            `[DUPLICATE] ${dup.file1}:${dup.line1} <-> ${dup.file2}:${dup.line2} (${Math.round(sim * 100)}%, conf: ${Math.round(confidence * 100)}%)`
           );
       }
     }

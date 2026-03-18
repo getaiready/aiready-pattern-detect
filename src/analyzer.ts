@@ -28,6 +28,9 @@ export interface PatternDetectOptions extends ScanOptions {
   createClusters?: boolean; // Create refactor clusters for related patterns (default: true)
   minClusterTokenCost?: number; // Minimum token cost for cluster reporting (default: 1000)
   minClusterFiles?: number; // Minimum files for cluster reporting (default: 3)
+  excludePatterns?: string[]; // Regex patterns to exclude specific code content
+  confidenceThreshold?: number; // 0-1, minimum confidence score for reporting
+  ignoreWhitelist?: string[]; // List of file pairs or patterns to ignore (false-positive whitelist)
   onProgress?: (processed: number, total: number, message: string) => void;
 }
 
@@ -176,6 +179,19 @@ function logConfiguration(
   console.log(`   Min shared tokens: ${config.minSharedTokens}`);
   console.log(`   Severity filter: ${config.severity}`);
   console.log(`   Include tests: ${config.includeTests}`);
+
+  if (config.excludePatterns && config.excludePatterns.length > 0) {
+    console.log(`   Exclude patterns: ${config.excludePatterns.length} active`);
+  }
+  if (config.confidenceThreshold && config.confidenceThreshold > 0) {
+    console.log(`   Confidence threshold: ${config.confidenceThreshold}`);
+  }
+  if (config.ignoreWhitelist && config.ignoreWhitelist.length > 0) {
+    console.log(
+      `   Ignore whitelist: ${config.ignoreWhitelist.length} entries`
+    );
+  }
+
   console.log('');
 }
 
@@ -210,6 +226,9 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     createClusters = true,
     minClusterTokenCost = 1000,
     minClusterFiles = 3,
+    excludePatterns = [],
+    confidenceThreshold = 0,
+    ignoreWhitelist = [],
     ...scanOptions
   } = finalOptions;
 
@@ -240,6 +259,9 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     minSharedTokens,
     maxCandidatesPerBlock,
     streamResults,
+    excludePatterns,
+    confidenceThreshold,
+    ignoreWhitelist,
     onProgress: options.onProgress,
   });
 
@@ -369,6 +391,7 @@ export function generateSummary(results: AnalysisResult[]): PatternSummary {
         },
       ],
       similarity: similarityMatch ? parseInt(similarityMatch[1]) / 100 : 0,
+      confidence: similarityMatch ? parseInt(similarityMatch[1]) / 100 : 0, // Fallback for summary
       patternType: (typeMatch?.[1] as PatternType) || 'unknown',
       tokenCost: tokenMatch ? parseInt(tokenMatch[1]) : 0,
     };

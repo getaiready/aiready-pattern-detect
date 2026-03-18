@@ -59,6 +59,18 @@ program
   .option('--include <patterns>', 'File patterns to include (comma-separated)')
   .option('--exclude <patterns>', 'File patterns to exclude (comma-separated)')
   .option(
+    '--exclude-patterns <regexes>',
+    'Regex patterns to exclude specific code content (comma-separated)'
+  )
+  .option(
+    '--confidence-threshold <number>',
+    'Minimum confidence score (0-1). Default: 0'
+  )
+  .option(
+    '--ignore-whitelist <patterns>',
+    'List of file pairs or patterns to ignore (comma-separated)'
+  )
+  .option(
     '--min-severity <level>',
     'Minimum severity to show: critical|major|minor|info. Default: minor'
   )
@@ -114,6 +126,9 @@ program
       streamResults: true,
       include: undefined,
       exclude: undefined,
+      excludePatterns: undefined,
+      confidenceThreshold: 0,
+      ignoreWhitelist: undefined,
       minSeverity: Severity.Minor,
       excludeTestFixtures: false,
       excludeTemplates: false,
@@ -152,6 +167,13 @@ program
         options.streamResults !== false && mergedConfig.streamResults,
       include: options.include?.split(',') || mergedConfig.include,
       exclude: options.exclude?.split(',') || mergedConfig.exclude,
+      excludePatterns:
+        options.excludePatterns?.split(',') || mergedConfig.excludePatterns,
+      confidenceThreshold: options.confidenceThreshold
+        ? parseFloat(options.confidenceThreshold)
+        : mergedConfig.confidenceThreshold,
+      ignoreWhitelist:
+        options.ignoreWhitelist?.split(',') || mergedConfig.ignoreWhitelist,
       minSeverity: (options.minSeverity ||
         mergedConfig.minSeverity) as Severity,
       excludeTestFixtures:
