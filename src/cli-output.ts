@@ -1,4 +1,11 @@
-import { getSeverityBadge, getSeverityValue } from '@aiready/core';
+import {
+  getSeverityBadge,
+  getSeverityValue,
+  generateReportHead,
+  generateStatCards,
+  generateTable,
+  generateReportFooter,
+} from '@aiready/core';
 
 /**
  * Get emoji icon representing a specific pattern type.
@@ -32,87 +39,55 @@ export function generateHTMLReport(results: any, summary?: any): string {
     ? { results, summary, metadata: { version: '0.11.22' } }
     : results;
   const { metadata } = data;
+  const s = data.summary;
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIReady - Pattern Detection Report</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 2rem; background-color: #f9f9f9; }
-    h1, h2 { color: #1a1a1a; border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; }
-    .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; border: 1px solid #eaeaea; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: #fff; padding: 1rem; border-radius: 6px; text-align: center; border: 1px solid #eaeaea; }
-    .stat-value { font-size: 1.8rem; font-weight: bold; color: #2563eb; }
-    .stat-label { font-size: 0.875rem; color: #666; text-transform: uppercase; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: white; border-radius: 4px; overflow: hidden; }
-    th, td { text-align: left; padding: 0.875rem 1rem; border-bottom: 1px solid #eaeaea; }
-    th { background-color: #f8fafc; font-weight: 600; color: #475569; }
-    tr:last-child td { border-bottom: none; }
-    .critical { color: #dc2626; font-weight: bold; }
-    .major { color: #ea580c; font-weight: bold; }
-    .minor { color: #2563eb; }
-    code { background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.875rem; color: #334155; }
-    .footer { margin-top: 4rem; text-align: center; color: #94a3b8; font-size: 0.875rem; }
-  </style>
-</head>
+  const head = generateReportHead('AIReady - Pattern Detection Report');
+
+  const scoreCard = `<div class="stat-card" style="margin-bottom: 2rem;">
+    <div class="stat-label">AI Ready Score (Deduplication)</div>
+    <div class="stat-value">${Math.max(0, 100 - Math.round(((s.duplicates?.length || 0) / (s.totalFiles || 1)) * 20))}%</div>
+  </div>`;
+
+  const stats = generateStatCards([
+    { value: s.totalFiles, label: 'Files Analyzed' },
+    { value: s.duplicates?.length || 0, label: 'Duplicate Clusters' },
+    { value: s.totalIssues, label: 'Total Issues' },
+  ]);
+
+  const tableRows = (s.duplicates || []).map((dup: any) => [
+    `<span class="${dup.similarity > 0.95 ? 'critical' : dup.similarity > 0.9 ? 'major' : 'minor'}">${Math.round(dup.similarity * 100)}%</span>`,
+    dup.patternType,
+    dup.files
+      .map((f: any) => `<code>${f.path}:${f.startLine}-${f.endLine}</code>`)
+      .join('<br>↔<br>'),
+    dup.tokenCost.toLocaleString(),
+  ]);
+
+  const table = generateTable({
+    headers: ['Similarity', 'Type', 'Locations', 'Tokens Wasted'],
+    rows: tableRows,
+  });
+
+  const body = `${scoreCard}
+${stats}
+<div class="card">
+  <h2>Duplicate Patterns</h2>
+  ${table}
+</div>`;
+
+  const footer = generateReportFooter({
+    title: 'Pattern Detection Report',
+    packageName: 'pattern-detect',
+    packageUrl: 'https://github.com/caopengau/aiready-pattern-detect',
+    bugUrl: 'https://github.com/caopengau/aiready-pattern-detect/issues',
+    version: metadata.version,
+  });
+
+  return `${head}
 <body>
   <h1>Pattern Detection Report</h1>
-  <div class="stat-card" style="margin-bottom: 2rem;">
-    <div class="stat-label">AI Ready Score (Deduplication)</div>
-    <div class="stat-value">${Math.max(0, 100 - Math.round(((summary.duplicates?.length || 0) / (summary.totalFiles || 1)) * 20))}%</div>
-  </div>
-
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-value">${summary.totalFiles}</div>
-      <div class="stat-label">Files Analyzed</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${summary.duplicates?.length || 0}</div>
-      <div class="stat-label">Duplicate Clusters</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${summary.totalIssues}</div>
-      <div class="stat-label">Total Issues</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Duplicate Patterns</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Similarity</th>
-          <th>Type</th>
-          <th>Locations</th>
-          <th>Tokens Wasted</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${(summary.duplicates || [])
-          .map(
-            (dup: any) => `
-          <tr>
-            <td class="${dup.similarity > 0.95 ? 'critical' : dup.similarity > 0.9 ? 'major' : 'minor'}">${Math.round(dup.similarity * 100)}%</td>
-            <td>${dup.patternType}</td>
-            <td>${dup.files.map((f: any) => `<code>${f.path}:${f.startLine}-${f.endLine}</code>`).join('<br>↔<br>')}</td>
-            <td>${dup.tokenCost.toLocaleString()}</td>
-          </tr>
-        `
-          )
-          .join('')}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="footer">
-    <p>Generated by <strong>@aiready/pattern-detect</strong> v${metadata.version}</p>
-    <p>Like AIReady? <a href="https://github.com/caopengau/aiready-pattern-detect">Star us on GitHub</a></p>
-    <p>Found a bug? <a href="https://github.com/caopengau/aiready-pattern-detect/issues">Report it here</a></p>
-  </div>
+  ${body}
+  ${footer}
 </body>
 </html>`;
 }
