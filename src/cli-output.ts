@@ -3,6 +3,7 @@ import {
   getSeverityValue,
   generateReportHead,
   generateStatCards,
+  generateScoreCard,
   generateTable,
   generateReportFooter,
 } from '@aiready/core';
@@ -43,10 +44,14 @@ export function generateHTMLReport(results: any, summary?: any): string {
 
   const head = generateReportHead('AIReady - Pattern Detection Report');
 
-  const scoreCard = `<div class="stat-card" style="margin-bottom: 2rem;">
-    <div class="stat-label">AI Ready Score (Deduplication)</div>
-    <div class="stat-value">${Math.max(0, 100 - Math.round(((s.duplicates?.length || 0) / (s.totalFiles || 1)) * 20))}%</div>
-  </div>`;
+  const score = Math.max(
+    0,
+    100 - Math.round(((s.duplicates?.length || 0) / (s.totalFiles || 1)) * 20)
+  );
+  const scoreCard = generateScoreCard(
+    `${score}%`,
+    'AI Ready Score (Deduplication)'
+  );
 
   const stats = generateStatCards([
     { value: s.totalFiles, label: 'Files Analyzed' },
