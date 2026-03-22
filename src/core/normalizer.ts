@@ -24,7 +24,8 @@ export function normalizeCode(code: string, isPython: boolean = false): string {
     .replace(/`[^`]*`/g, '`STR`')
     .replace(/\b\d+\b/g, 'NUM')
     .replace(/\s+/g, ' ')
-    .trim();
+    .trim()
+    .toLowerCase();
 }
 
 const stopwords = new Set([
