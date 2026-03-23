@@ -1,4 +1,11 @@
-import { Severity } from '@aiready/core';
+import {
+  IssueType,
+  getSeverityLabel,
+  filterBySeverity,
+  Severity,
+} from '@aiready/core';
+
+export { IssueType, getSeverityLabel, filterBySeverity, Severity };
 
 /**
  * Context-aware severity detection for duplicate patterns
@@ -282,42 +289,6 @@ export function calculateSeverity(
  * @param severity - The severity level to label.
  * @returns Formatted label string for UI display.
  */
-export function getSeverityLabel(severity: Severity): string {
-  const labels: Record<Severity, string> = {
-    [Severity.Critical]: '🔴 CRITICAL',
-    [Severity.Major]: '🟡 MAJOR',
-    [Severity.Minor]: '🔵 MINOR',
-    [Severity.Info]: 'ℹ️  INFO',
-  };
-  return labels[severity];
-}
-
-/**
- * Filter duplicates by minimum severity threshold
- *
- * @param duplicates - List of items with a severity property.
- * @param minSeverity - Minimum threshold for inclusion.
- * @returns Filtered list of items.
- */
-export function filterBySeverity<T extends { severity: Severity }>(
-  duplicates: T[],
-  minSeverity: Severity
-): T[] {
-  const severityOrder: Severity[] = [
-    Severity.Info,
-    Severity.Minor,
-    Severity.Major,
-    Severity.Critical,
-  ];
-  const minIndex = severityOrder.indexOf(minSeverity);
-
-  if (minIndex === -1) return duplicates;
-
-  return duplicates.filter((dup) => {
-    const dupIndex = severityOrder.indexOf(dup.severity);
-    return dupIndex >= minIndex;
-  });
-}
 
 /**
  * Get numerical similarity threshold associated with a severity level

@@ -3,11 +3,23 @@ import { ApproxEngine } from '../core/approx-engine';
 import type { CodeBlock } from '../core/types';
 
 describe('ApproxEngine', () => {
+<<<<<<< HEAD
   const createBlock = (file: string, startLine: number, endLine: number): CodeBlock => ({
+=======
+  const createBlock = (
+    file: string,
+    startLine: number,
+    endLine: number
+  ): CodeBlock => ({
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
     file,
     startLine,
     endLine,
     code: '',
+<<<<<<< HEAD
+=======
+    tokens: 0,
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
     patternType: 'function',
   });
 
@@ -27,7 +39,11 @@ describe('ApproxEngine', () => {
       // Add two blocks that share a rare token (appears 2 times < threshold of 3)
       blocks.push(createBlock('fileA.ts', 1, 5));
       tokens.push(['sharedRare', 'commonA', 'specificA1']);
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
       blocks.push(createBlock('fileB.ts', 1, 5));
       tokens.push(['sharedRare', 'commonB', 'specificB1']);
 
@@ -52,14 +68,24 @@ describe('ApproxEngine', () => {
       // Add two blocks from same file with shared rare token
       blocks.push(createBlock('shared.ts', 1, 5));
       tokens.push(['sharedRare', 'func1']);
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
       blocks.push(createBlock('shared.ts', 10, 15));
       tokens.push(['sharedRare', 'func2']);
 
       const engine = new ApproxEngine(blocks, tokens);
       const candidates = engine.findCandidates(28, 1, 10);
 
+<<<<<<< HEAD
       const sameFileCandidates = candidates.filter(c => blocks[c.j].file === 'shared.ts');
+=======
+      const sameFileCandidates = candidates.filter(
+        (c) => blocks[c.j].file === 'shared.ts'
+      );
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
       expect(sameFileCandidates).toHaveLength(0);
     });
 
@@ -92,7 +118,11 @@ describe('ApproxEngine', () => {
       // Add two blocks with only 1 shared rare token
       blocks.push(createBlock('fileA.ts', 1, 5));
       tokens.push(['sharedRare', 'uniqueA']);
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
       blocks.push(createBlock('fileB.ts', 1, 5));
       tokens.push(['sharedRare', 'uniqueB']);
 
@@ -116,7 +146,11 @@ describe('ApproxEngine', () => {
       // Add one block with a rare token
       blocks.push(createBlock('target.ts', 1, 5));
       tokens.push(['sharedRare', 'unique1']);
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
       // Add 3 more blocks sharing that rare token
       for (let i = 0; i < 3; i++) {
         blocks.push(createBlock(`match${i}.ts`, 1, 5));
@@ -142,11 +176,19 @@ describe('ApproxEngine', () => {
       // Add target block
       blocks.push(createBlock('target.ts', 1, 5));
       tokens.push(['rare1', 'rare2', 'common']);
+<<<<<<< HEAD
       
       // Block with 2 shared rare tokens
       blocks.push(createBlock('match1.ts', 1, 5));
       tokens.push(['rare1', 'rare2', 'other1']);
       
+=======
+
+      // Block with 2 shared rare tokens
+      blocks.push(createBlock('match1.ts', 1, 5));
+      tokens.push(['rare1', 'rare2', 'other1']);
+
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
       // Block with 1 shared rare token
       blocks.push(createBlock('match2.ts', 1, 5));
       tokens.push(['rare1', 'other2', 'other3']);
@@ -159,12 +201,17 @@ describe('ApproxEngine', () => {
     });
 
     it('should return empty for single block', () => {
+<<<<<<< HEAD
       const blocks: CodeBlock[] = [
         createBlock('file1.ts', 1, 5),
       ];
       const tokens = [
         ['foo', 'bar', 'baz'],
       ];
+=======
+      const blocks: CodeBlock[] = [createBlock('file1.ts', 1, 5)];
+      const tokens = [['foo', 'bar', 'baz']];
+>>>>>>> ec12b182 (test: add regression tests to improve testability score)
 
       const engine = new ApproxEngine(blocks, tokens);
       const candidates = engine.findCandidates(0, 1, 10);
