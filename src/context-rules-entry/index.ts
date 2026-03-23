@@ -7,5 +7,5 @@ export {
   getSeverityLabel,
   filterBySeverity,
   getSeverityThreshold,
-} from './context-rules';
-export type { ContextRule } from './context-rules';
+} from '../context-rules';
+export type { ContextRule } from '../context-rules';

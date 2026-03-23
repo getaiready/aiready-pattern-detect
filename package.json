@@ -15,29 +15,29 @@
       "import": "./dist/index.mjs"
     },
     "./analyzer": {
-      "types": "./dist/analyzer-entry.d.ts",
-      "require": "./dist/analyzer-entry.js",
-      "import": "./dist/analyzer-entry.mjs"
+      "types": "./dist/analyzer-entry/index.d.ts",
+      "require": "./dist/analyzer-entry/index.js",
+      "import": "./dist/analyzer-entry/index.mjs"
     },
     "./detector": {
-      "types": "./dist/detector-entry.d.ts",
-      "require": "./dist/detector-entry.js",
-      "import": "./dist/detector-entry.mjs"
+      "types": "./dist/detector-entry/index.d.ts",
+      "require": "./dist/detector-entry/index.js",
+      "import": "./dist/detector-entry/index.mjs"
     },
     "./scoring": {
-      "types": "./dist/scoring-entry.d.ts",
-      "require": "./dist/scoring-entry.js",
-      "import": "./dist/scoring-entry.mjs"
+      "types": "./dist/scoring-entry/index.d.ts",
+      "require": "./dist/scoring-entry/index.js",
+      "import": "./dist/scoring-entry/index.mjs"
     },
     "./context-rules": {
-      "types": "./dist/context-rules-entry.d.ts",
-      "require": "./dist/context-rules-entry.js",
-      "import": "./dist/context-rules-entry.mjs"
+      "types": "./dist/context-rules-entry/index.d.ts",
+      "require": "./dist/context-rules-entry/index.js",
+      "import": "./dist/context-rules-entry/index.mjs"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/cli.ts src/analyzer-entry.ts src/detector-entry.ts src/scoring-entry.ts src/context-rules-entry.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/cli.ts src/analyzer-entry.ts src/detector-entry.ts src/scoring-entry.ts src/context-rules-entry.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/cli.ts src/analyzer-entry/index.ts src/detector-entry/index.ts src/scoring-entry/index.ts src/context-rules-entry/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/cli.ts src/analyzer-entry/index.ts src/detector-entry/index.ts src/scoring-entry/index.ts src/context-rules-entry/index.ts --format cjs,esm --dts --watch",
     "test": "vitest run",
     "lint": "eslint src",
     "clean": "rm -rf dist",
