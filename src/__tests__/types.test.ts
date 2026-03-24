@@ -1,14 +1,10 @@
 import { describe, it, expect } from 'vitest';
-<<<<<<< HEAD
-import type { CodeBlock, DuplicatePattern, DetectionOptions, PatternType } from '../core/types';
-=======
 import type {
   CodeBlock,
   DuplicatePattern,
   DetectionOptions,
   PatternType,
 } from '../core/types';
->>>>>>> ec12b182 (test: add regression tests to improve testability score)
 import { Severity } from '@aiready/core';
 
 describe('Core Types', () => {
@@ -30,10 +26,7 @@ describe('Core Types', () => {
           startLine: 1,
           endLine: 5,
           code: '',
-<<<<<<< HEAD
-=======
           tokens: 0,
->>>>>>> ec12b182 (test: add regression tests to improve testability score)
           patternType: type,
         };
         expect(block.patternType).toBe(type);
@@ -48,10 +41,7 @@ describe('Core Types', () => {
         startLine: 10,
         endLine: 20,
         code: 'function helper() {}',
-<<<<<<< HEAD
-=======
         tokens: 100,
->>>>>>> ec12b182 (test: add regression tests to improve testability score)
         patternType: 'function',
       };
 
@@ -68,10 +58,7 @@ describe('Core Types', () => {
         startLine: 1,
         endLine: 5,
         code: '',
-<<<<<<< HEAD
-=======
         tokens: 0,
->>>>>>> ec12b182 (test: add regression tests to improve testability score)
         patternType: 'custom-pattern',
       };
       expect(block.patternType).toBe('custom-pattern');

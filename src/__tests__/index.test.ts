@@ -43,28 +43,13 @@ describe('pattern-detect index', () => {
 
   describe('PatternDetectProvider', () => {
     it('should have required provider methods', () => {
-<<<<<<< HEAD
-      expect(typeof patternDetect.PatternDetectProvider.analyze).toBe('function');
-=======
       expect(typeof patternDetect.PatternDetectProvider.analyze).toBe(
         'function'
       );
->>>>>>> ec12b182 (test: add regression tests to improve testability score)
       expect(typeof patternDetect.PatternDetectProvider.score).toBe('function');
     });
 
     it('should have alias array', () => {
-<<<<<<< HEAD
-      expect(Array.isArray(patternDetect.PatternDetectProvider.alias)).toBe(true);
-      expect(patternDetect.PatternDetectProvider.alias).toContain('patterns');
-      expect(patternDetect.PatternDetectProvider.alias).toContain('duplicates');
-      expect(patternDetect.PatternDetectProvider.alias).toContain('duplication');
-    });
-
-    it('should have defaultWeight', () => {
-      expect(typeof patternDetect.PatternDetectProvider.defaultWeight).toBe('number');
-      expect(patternDetect.PatternDetectProvider.defaultWeight).toBeGreaterThan(0);
-=======
       expect(Array.isArray(patternDetect.PatternDetectProvider.alias)).toBe(
         true
       );
@@ -82,7 +67,6 @@ describe('pattern-detect index', () => {
       expect(patternDetect.PatternDetectProvider.defaultWeight).toBeGreaterThan(
         0
       );
->>>>>>> ec12b182 (test: add regression tests to improve testability score)
     });
   });
 });
