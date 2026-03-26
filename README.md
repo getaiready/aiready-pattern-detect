@@ -13,7 +13,6 @@ AI models often suffer from "semantic confusion" when multiple variants of the s
 
 - **Full Support:** TypeScript, JavaScript, Python, Java, Go, C#
 - **Capabilities:** Semantic duplicate detection, logic fragmentation, refactoring suggestions.
-  toxicology
 
 ## 🏛️ Architecture
 
@@ -22,11 +21,11 @@ AI models often suffer from "semantic confusion" when multiple variants of the s
                       │
                       ▼
          🎛️  @aiready/cli (orchestrator)
-          │     │     │     │     │     │     │     │     │
-          ▼     ▼     ▼     ▼     ▼     ▼     ▼     ▼     ▼
-        [PAT] [CTX] [CON] [AMP] [DEP] [DOC] [SIG] [AGT] [TST]
-          │     │     │     │     │     │     │     │     │
-          └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
+          │     │     │     │     │     │     │     │     │     │
+          ▼     ▼     ▼     ▼     ▼     ▼     ▼     ▼     ▼     ▼
+        [PAT] [CTX] [CON] [AMP] [DEP] [DOC] [SIG] [AGT] [TST] [CTR]
+          │     │     │     │     │     │     │     │     │     │
+          └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
                                │
                                ▼
                       🏢 @aiready/core
@@ -36,7 +35,8 @@ Legend:
   CON = consistency           AMP = change-amplification
   DEP = deps-health           DOC = doc-drift
   SIG = ai-signal-clarity     AGT = agent-grounding
-  TST = testability           ★   = YOU ARE HERE
+  TST = testability           CTR = contract-enforcement
+  ★   = YOU ARE HERE
 ```
 
 ## Features
