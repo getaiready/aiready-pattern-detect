@@ -1,4 +1,4 @@
-import { analyzePatterns, generateSummary } from './index';
+import { analyzePatterns, generateSummary } from './analyzer';
 import { filterBySeverity } from './context-rules';
 import chalk from 'chalk';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
