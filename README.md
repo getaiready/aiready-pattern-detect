@@ -143,6 +143,13 @@ AIReady uses a **hub-and-spoke architecture** for modularity and extensibility:
 - **Clean**: Spokes only depend on core, not each other
 - **Monetizable**: OSS detection + SaaS remediation + Expert consulting
 
+## 📚 Resources & Learning
+
+- 📖 **[AI Engineering Handbook](./docs/AI_ENGINEERING_HANDBOOK.md)** - A structured learning path for building AI-ready repositories.
+- 🔬 **[Case Study: AIReady on AIReady](./docs/reviews/aiready-on-aiready-case-study.md)** - See how we used our own tools to improve our codebase.
+- 🌐 **[Official Website](https://getaiready.dev)** - Full platform features, dashboard, and documentation.
+- 🧪 **[Interactive Demo](https://getaiready.dev/demo)** - Try AIReady on your own repo in the browser.
+
 ## 🚀 Quick Start
 
 ### Using Individual Tools

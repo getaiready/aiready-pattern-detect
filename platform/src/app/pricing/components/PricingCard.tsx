@@ -7,9 +7,27 @@ interface PricingCardProps {
   plan: any;
   index: number;
   onJoinWaitlist: (planName: string) => void;
+  onUpgrade: (planName: string) => void;
 }
 
-export function PricingCard({ plan, index, onJoinWaitlist }: PricingCardProps) {
+export function PricingCard({
+  plan,
+  index,
+  onJoinWaitlist,
+  onUpgrade,
+}: PricingCardProps) {
+  const isWaitlist = plan.cta === 'Join Waitlist';
+  const isAvailable = plan.available;
+  const isExternal = plan.href && plan.href !== '#';
+
+  const handleAction = () => {
+    if (isWaitlist) {
+      onJoinWaitlist(plan.name);
+    } else if (isAvailable && !isExternal) {
+      onUpgrade(plan.name);
+    }
+  };
+
   return (
     <motion.div
       key={plan.name}
@@ -80,9 +98,9 @@ export function PricingCard({ plan, index, onJoinWaitlist }: PricingCardProps) {
         ))}
       </div>
 
-      {plan.cta === 'Join Waitlist' ? (
+      {!isExternal ? (
         <button
-          onClick={() => onJoinWaitlist(plan.name)}
+          onClick={handleAction}
           className={`w-full text-center py-3 rounded-xl font-bold transition-all ${
             plan.featured
               ? 'bg-cyan-500 hover:bg-cyan-400 text-white shadow-lg shadow-cyan-500/20'

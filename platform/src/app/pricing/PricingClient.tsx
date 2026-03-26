@@ -9,6 +9,8 @@ import PlatformShell from '@/components/PlatformShell';
 import WaitingListModal from '@/components/WaitingListModal';
 import { plans } from './constants';
 import { PricingCard } from './components/PricingCard';
+import { PlanSelectionModal } from './components/PlanSelectionModal';
+import { toast } from 'sonner';
 
 export default function PricingClient({
   user,
@@ -16,6 +18,78 @@ export default function PricingClient({
   overallScore,
 }: Props) {
   const [waitlistPlan, setWaitlistPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleUpgrade = async (plan: string) => {
+    const planKey = plan.toLowerCase();
+
+    // Free plan or Enterprise - redirect or contact
+    if (planKey === 'free') {
+      window.location.href = '/login';
+      return;
+    }
+    if (planKey === 'enterprise') {
+      window.location.href = '/contact';
+      return;
+    }
+
+    // Pro or Team - handle checkout
+    if (!user) {
+      window.location.href = `/login?redirect=/pricing#${planKey}`;
+      return;
+    }
+
+    if (teams.length === 0) {
+      toast.error('You need to create a team first to upgrade.', {
+        description: 'Go to your dashboard to create a team.',
+        action: {
+          label: 'Go to Dashboard',
+          onClick: () => (window.location.href = '/dashboard'),
+        },
+      });
+      return;
+    }
+
+    if (teams.length === 1) {
+      // Direct checkout for single team
+      await startCheckout(teams[0].teamId, planKey);
+    } else {
+      // Show modal to select team
+      setSelectedPlan(plan);
+    }
+  };
+
+  const startCheckout = async (teamId: string, plan: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'checkout',
+          teamId,
+          plan: plan.toLowerCase(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to start checkout');
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      toast.error('Failed to start checkout. Please try again.');
+      setIsLoading(false);
+    }
+  };
 
   return (
     <PlatformShell
@@ -60,6 +134,7 @@ export default function PricingClient({
                 plan={plan}
                 index={index}
                 onJoinWaitlist={setWaitlistPlan}
+                onUpgrade={handleUpgrade}
               />
             ))}
           </div>
@@ -84,6 +159,15 @@ export default function PricingClient({
         isOpen={!!waitlistPlan}
         onClose={() => setWaitlistPlan(null)}
         planName={waitlistPlan || ''}
+      />
+
+      <PlanSelectionModal
+        isOpen={!!selectedPlan}
+        onClose={() => setSelectedPlan(null)}
+        planName={selectedPlan || ''}
+        teams={teams}
+        onSelectTeam={(teamId) => startCheckout(teamId, selectedPlan || '')}
+        isLoading={isLoading}
       />
     </PlatformShell>
   );
