@@ -9,8 +9,8 @@
   "hero": {
     "badge": "Autonomous Infrastructure Platform",
     "title1": "Self-Healing,",
-    "title2": "Auto-Improving",
-    "title3": "Cloud",
+    "title2": "Self-Evolving",
+    "title3": "Claw",
     "description": "ClawMore monitors your AWS infrastructure, detects issues, and automatically applies fixes — while you sleep."
   },
   "pillars": {

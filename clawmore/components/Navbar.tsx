@@ -9,7 +9,6 @@ import {
   RefreshCcw,
   Zap,
   Activity,
-  Code,
   ArrowLeft,
   Menu,
   X,
@@ -121,32 +120,6 @@ export default function Navbar({ variant = 'home', dict }: NavbarProps) {
 
           <div className="hidden sm:flex items-center gap-2 pl-2 sm:pl-3 lg:pl-4 border-l border-white/10">
             <LocaleSwitcher />
-            <Link
-              href="https://github.com/caopengau/serverlessclaw"
-              className="hidden lg:flex px-4 py-2 rounded-sm bg-white/5 hover:bg-white/10 text-white transition-all items-center gap-2 border border-white/10"
-            >
-              <Code className="w-3 h-3" /> {dict?.navbar?.source || 'Source'}
-            </Link>
-            <div
-              className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-sm ${
-                variant === 'home'
-                  ? 'bg-cyber-blue/5 border border-cyber-blue/20'
-                  : 'bg-cyber-purple/5 border border-cyber-purple/20'
-              }`}
-            >
-              <div
-                className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                  variant === 'home' ? 'bg-cyber-blue' : 'bg-cyber-purple'
-                }`}
-              />
-              <span
-                className={`text-[9px] font-black ${
-                  variant === 'home' ? 'text-cyber-blue' : 'text-cyber-purple'
-                }`}
-              >
-                {variant === 'home' ? 'LINK_ACTIVE' : 'SYNC_ACTIVE'}
-              </span>
-            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -255,17 +228,7 @@ export default function Navbar({ variant = 'home', dict }: NavbarProps) {
               )}
 
               <div className="mt-3 pt-3 border-t border-white/10 flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-3">
-                  <LocaleSwitcher />
-                  <Link
-                    href="https://github.com/caopengau/serverlessclaw"
-                    onClick={closeMobileMenu}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-sm border border-white/15 bg-white/5 text-zinc-100 hover:bg-white/10 transition-colors"
-                  >
-                    <Code className="w-3.5 h-3.5" />{' '}
-                    {dict?.navbar?.source || 'Source'}
-                  </Link>
-                </div>
+                <LocaleSwitcher />
                 {session ? (
                   <button
                     onClick={() => {

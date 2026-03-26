@@ -53,14 +53,6 @@ export const metadata: Metadata = {
     title: 'ClawMore | OpenClaw Agentic Swarm for AWS',
     description:
       "Simple one-click OpenClaw deployment. The world's first autonomous agentic swarm for serverless AWS. AI orchestration, AI automation, and agent collaboration.",
-    keywords: [
-      'openclaw',
-      'agentic swarm',
-      'ai orchestration',
-      'ai automation',
-      'serverless',
-      'agent to agent collaboration',
-    ],
     images: [
       {
         url: '/og-home.png',
