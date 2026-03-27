@@ -125,7 +125,8 @@ export async function getSmartDefaults(
     Math.min(20, 6 + Math.floor(estimatedBlocks / 1000) * 2)
   );
 
-  const minSimilarity = Math.min(0.85, 0.5 + (estimatedBlocks / 5000) * 0.3);
+  // Adjusted formula to be less aggressive - start at 0.45 and increase more slowly
+  const minSimilarity = Math.min(0.75, 0.45 + (estimatedBlocks / 10000) * 0.3);
   const batchSize = estimatedBlocks > 1000 ? 200 : 100;
   const severity = estimatedBlocks > 3000 ? 'high' : 'all';
   const maxCandidatesPerBlock = Math.max(
@@ -347,9 +348,9 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
  * @returns Consolidated pattern summary object.
  */
 export function generateSummary(results: AnalysisResult[]): PatternSummary {
-  const allIssues = results.flatMap((r) => r.issues);
+  const allIssues = results.flatMap((r) => r.issues || []);
   const totalTokenCost = results.reduce(
-    (sum, r) => sum + (r.metrics.tokenCost || 0),
+    (sum, r) => sum + (r.metrics?.tokenCost || 0),
     0
   );
 

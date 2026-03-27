@@ -60,8 +60,11 @@ export async function patternActionHandler(directory: string, options: any) {
   }
 
   const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-  const summary = generateSummary(results);
-  const totalIssues = results.reduce((sum, r) => sum + r.issues.length, 0);
+  const summary = generateSummary(results || []);
+  const totalIssues = (results || []).reduce(
+    (sum, r) => sum + (r.issues?.length || 0),
+    0
+  );
 
   // 4. Output generation
   if (options.output === 'json') {
