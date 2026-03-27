@@ -8,8 +8,8 @@ const meta = {
   tags: ['AI', 'Developer Productivity', 'Code Quality', 'Community'],
   readingTime: '10 min read',
   slug: 'why-ai-coding-assistants-get-worse',
-  cover: '',
-  ogImage: '',
+  cover: '/why-ai-gets-worse-cover.png',
+  ogImage: '/why-ai-gets-worse-cover.png',
 };
 
 export default meta;

@@ -45,6 +45,9 @@ platform/.env
 platform/.env.local
 platform/.env.*.local
 
+# Discord
+discord/.env
+
 # SST (AWS deployment)
 .sst/
 .open-next/

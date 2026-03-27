@@ -4,6 +4,7 @@ packages:
   - 'landing'
   - 'clawmore'
   - 'platform'
+  - 'discord'
   - 'integration-tests'
   - 'vscode-extension'
   - 'workers/*'

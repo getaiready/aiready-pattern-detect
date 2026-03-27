@@ -4,6 +4,13 @@ import CodeBlock from '../../components/CodeBlock';
 
 const Post = () => (
   <>
+    <div className="my-8 max-w-4xl mx-auto">
+      <img
+        src="/why-ai-gets-worse-cover.png"
+        alt="Why AI Coding Assistants Get Worse - cover"
+        className="w-full rounded-3xl shadow-2xl border border-slate-200 dark:border-zinc-800"
+      />
+    </div>
     <p>
       Have you ever noticed that GitHub Copilot, Cursor, or Claude Code seems to
       give you worse suggestions after a few months? You&apos;re not imagining

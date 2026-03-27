@@ -33,7 +33,7 @@
     "visualize": "node scripts/visualize.js",
     "prepare": "husky",
     "lint-staged": "lint-staged",
-    "discord:setup": "tsx scripts/discord-setup.ts"
+    "discord:setup": "cd discord && npx tsx src/setup.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",
@@ -44,6 +44,7 @@
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
     "@vitest/coverage-v8": "^4.1.1",
+    "discord.js": "^14.25.1",
     "eslint": "^10.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "6.10.2",
@@ -56,6 +57,7 @@
     "ovsx": "^0.10.9",
     "prettier": "^3.8.1",
     "semver": "^7.7.4",
+    "tsx": "^4.21.0",
     "turbo": "^2.8.20",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2",

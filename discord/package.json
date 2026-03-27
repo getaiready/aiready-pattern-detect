@@ -1,0 +1,21 @@
+{
+  "name": "@aiready/discord",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Discord server management and bot for AIReady community",
+  "scripts": {
+    "setup": "tsx src/setup.ts",
+    "dev": "tsx watch src/bot.ts",
+    "start": "tsx src/bot.ts"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

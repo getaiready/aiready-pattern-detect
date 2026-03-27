@@ -4,6 +4,13 @@ import CodeBlock from '../../components/CodeBlock';
 
 const Post = () => (
   <>
+    <div className="my-8 max-w-4xl mx-auto">
+      <img
+        src="/getting-started-cli-cover.png"
+        alt="Getting Started with AIReady CLI - cover"
+        className="w-full rounded-3xl shadow-2xl border border-slate-200 dark:border-zinc-800"
+      />
+    </div>
     <p>
       Have you ever noticed that AI coding assistants sometimes give you worse
       suggestions over time? Or that they keep suggesting code that already

@@ -8,8 +8,8 @@ const meta = {
   tags: ['Tutorial', 'Getting Started', 'CLI', 'AI Readiness'],
   readingTime: '8 min read',
   slug: 'getting-started-with-aiready-cli',
-  cover: '',
-  ogImage: '',
+  cover: '/getting-started-cli-cover.png',
+  ogImage: '/getting-started-cli-cover.png',
 };
 
 export default meta;
