@@ -518,6 +518,26 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
               ClawMore
             </span>
           </div>
+          <div className="flex items-center justify-center gap-6 mb-8">
+            <Link
+              href="/terms"
+              className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest hover:text-white transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest hover:text-white transition-colors"
+            >
+              Privacy
+            </Link>
+            <a
+              href="mailto:support@getaiready.dev"
+              className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest hover:text-white transition-colors"
+            >
+              Support
+            </a>
+          </div>
           <div className="text-zinc-500 text-sm">
             {dict.footer.ecosystem}{' '}
             <Link

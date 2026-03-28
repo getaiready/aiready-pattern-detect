@@ -56,7 +56,7 @@ export default function DashboardClient({
   const [provisionAccountId, setProvisionAccountId] = React.useState(
     status.awsAccountId
   );
-  const [provisionRepoUrl, setProvisionRepoUrl] = React.useState(
+  const [_provisionRepoUrl, setProvisionRepoUrl] = React.useState(
     status.repoUrl
   );
   const [pollCount, setPollCount] = React.useState(0);

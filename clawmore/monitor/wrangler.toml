@@ -7,5 +7,6 @@ crons = ["*/5 * * * *"]
 
 [vars]
 PROJECT_NAME = "ClawMore"
-URL_TO_CHECK = "https://clawmore.getaiready.dev"
-HEALTH_API_URL = "https://hh6xn4b2wj.execute-api.ap-southeast-2.amazonaws.com"
+# URLs should be set via `wrangler secret put` or dashboard for production
+# URL_TO_CHECK = ""
+# HEALTH_API_URL = ""
