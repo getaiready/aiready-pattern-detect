@@ -261,6 +261,11 @@ export default $config({
         GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || '',
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
         GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+        GITHUB_SERVICE_TOKEN: process.env.GITHUB_SERVICE_TOKEN || '',
+        SPOKE_TELEGRAM_BOT_TOKEN: process.env.SPOKE_TELEGRAM_BOT_TOKEN || '',
+        SPOKE_MINIMAX_API_KEY: process.env.SPOKE_MINIMAX_API_KEY || '',
+        SPOKE_OPENAI_API_KEY: process.env.SPOKE_OPENAI_API_KEY || '',
+        SPOKE_GITHUB_TOKEN: process.env.SPOKE_GITHUB_TOKEN || '',
         AUTH_SECRET:
           process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || '',
         ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',

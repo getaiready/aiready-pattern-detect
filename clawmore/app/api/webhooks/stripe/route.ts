@@ -105,15 +105,28 @@ export async function POST(req: NextRequest) {
                 log.error({ err, userId }, 'Failed to send approval email')
               );
 
-              // Trigger Autonomous Provisioning
+              // Trigger Autonomous Provisioning (awaited for status tracking)
               const githubToken = process.env.GITHUB_SERVICE_TOKEN;
               if (githubToken && repoName) {
                 log.info(
                   { userId, email: userEmail },
                   'Triggering provisioning'
                 );
-                const orchestrator = new ProvisioningOrchestrator(githubToken);
 
+                // Set provisioning status to in_progress
+                await docClient.update({
+                  TableName,
+                  Key: { PK: `USER#${userId}`, SK: 'METADATA' },
+                  UpdateExpression:
+                    'SET provisioningStatus = :status, provisioningStartedAt = :now',
+                  ExpressionAttributeValues: {
+                    ':status': 'PROVISIONING',
+                    ':now': new Date().toISOString(),
+                  },
+                });
+
+                // Fire-and-forget with proper status tracking
+                const orchestrator = new ProvisioningOrchestrator(githubToken);
                 orchestrator
                   .provisionNode({
                     userEmail,
@@ -122,15 +135,46 @@ export async function POST(req: NextRequest) {
                     githubToken,
                     coEvolutionOptIn:
                       session.metadata?.coEvolutionOptIn === 'true',
+                    sstSecrets: {
+                      TelegramBotToken:
+                        process.env.SPOKE_TELEGRAM_BOT_TOKEN || '',
+                      MiniMaxApiKey: process.env.SPOKE_MINIMAX_API_KEY || '',
+                      OpenAIApiKey: process.env.SPOKE_OPENAI_API_KEY || '',
+                      GitHubToken: process.env.SPOKE_GITHUB_TOKEN || '',
+                    },
                   })
-                  .then((result) => {
+                  .then(async (result) => {
                     log.info(
                       { userId, accountId: result.accountId },
                       'Provisioning complete'
                     );
+                    await docClient.update({
+                      TableName,
+                      Key: { PK: `USER#${userId}`, SK: 'METADATA' },
+                      UpdateExpression:
+                        'SET provisioningStatus = :status, awsAccountId = :accountId, repoUrl = :repoUrl, provisioningCompletedAt = :now',
+                      ExpressionAttributeValues: {
+                        ':status': 'COMPLETE',
+                        ':accountId': result.accountId,
+                        ':repoUrl': result.repoUrl,
+                        ':now': new Date().toISOString(),
+                      },
+                    });
                   })
-                  .catch((err) => {
+                  .catch(async (err) => {
                     log.error({ err, userId }, 'Provisioning failed');
+                    await docClient
+                      .update({
+                        TableName,
+                        Key: { PK: `USER#${userId}`, SK: 'METADATA' },
+                        UpdateExpression:
+                          'SET provisioningStatus = :status, provisioningError = :error',
+                        ExpressionAttributeValues: {
+                          ':status': 'FAILED',
+                          ':error': err.message || 'Unknown error',
+                        },
+                      })
+                      .catch(console.error);
                   });
               }
 

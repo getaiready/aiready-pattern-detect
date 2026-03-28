@@ -21,6 +21,7 @@ export interface ProvisioningOptions {
   githubToken: string;
   repoName: string;
   coEvolutionOptIn: boolean; // TRUE = Free Mutations, FALSE = $1.00 Tax
+  sstSecrets?: Record<string, string>; // SST secrets to inject into the spoke
 }
 
 export class ProvisioningOrchestrator {
@@ -107,7 +108,34 @@ export class ProvisioningOrchestrator {
         coEvolutionOptIn ? 'true' : 'false'
       );
 
-      // 5. DynamoDB Persistence (Crucial for Dashboard and Billing)
+      // 5. SST Secret Injection (for spoke stack to boot)
+      if (options.sstSecrets && Object.keys(options.sstSecrets).length > 0) {
+        console.log(`[Provision] Injecting SST secrets into spoke...`);
+        const secretEntries = Object.entries(options.sstSecrets);
+        for (const [secretName, secretValue] of secretEntries) {
+          if (secretValue) {
+            await this.octokit.actions.createOrUpdateRepoSecret({
+              owner: githubOrg,
+              repo: repoName,
+              secret_name: `SST_SECRET_${secretName}`,
+              encrypted_value: await this.encryptSecret(
+                githubOrg,
+                repoName,
+                secretValue
+              ),
+              key_id: (
+                await this.octokit.actions.getRepoPublicKey({
+                  owner: githubOrg,
+                  repo: repoName,
+                })
+              ).data.key_id,
+            });
+            console.log(`[Provision] SST secret ${secretName} injected.`);
+          }
+        }
+      }
+
+      // 6. DynamoDB Persistence (Crucial for Dashboard and Billing)
       console.log(`[Provision] Recording managed account in DynamoDB...`);
       await createManagedAccountRecord({
         awsAccountId: accountId,
@@ -154,6 +182,26 @@ export class ProvisioningOrchestrator {
     name: string,
     value: string
   ) {
+    const encryptedValue = await this.encryptSecret(owner, repo, value);
+    const { data: publicKey } = await this.octokit.actions.getRepoPublicKey({
+      owner,
+      repo,
+    });
+
+    await this.octokit.actions.createOrUpdateRepoSecret({
+      owner,
+      repo,
+      secret_name: name,
+      encrypted_value: encryptedValue,
+      key_id: publicKey.key_id,
+    });
+  }
+
+  private async encryptSecret(
+    owner: string,
+    repo: string,
+    value: string
+  ): Promise<string> {
     await sodium.ready;
     const { data: publicKey } = await this.octokit.actions.getRepoPublicKey({
       owner,
@@ -166,17 +214,6 @@ export class ProvisioningOrchestrator {
     );
     const binSec = sodium.from_string(value);
     const encBytes = sodium.crypto_box_seal(binSec, binKey);
-    const encryptedValue = sodium.to_base64(
-      encBytes,
-      sodium.base64_variants.ORIGINAL
-    );
-
-    await this.octokit.actions.createOrUpdateRepoSecret({
-      owner,
-      repo,
-      secret_name: name,
-      encrypted_value: encryptedValue,
-      key_id: publicKey.key_id,
-    });
+    return sodium.to_base64(encBytes, sodium.base64_variants.ORIGINAL);
   }
 }
