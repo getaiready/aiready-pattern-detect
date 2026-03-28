@@ -46,14 +46,14 @@ export const PatternDetectProvider: ToolProvider = {
   },
 
   score(output: SpokeOutput, options: ScanOptions): ToolScoringOutput {
-    const duplicates = (output.summary as any).duplicates || [];
+    const duplicates = output.summary.duplicates || [];
+    const scoreData = duplicates;
     const totalFiles =
-      (output.summary as any).totalFiles || output.results.length;
-
+      output.summary.totalFiles || output.results.length;
     return calculatePatternScore(
-      duplicates,
+      scoreData,
       totalFiles,
-      (options as any).costConfig
+      options.costConfig
     );
   },
 
