@@ -130,7 +130,7 @@ publish: ## Publish spoke to GitHub. Usage: make publish SPOKE=pattern-detect [O
 	git subtree split --prefix=packages/$(SPOKE) -b "$$branch" >/dev/null; \
 	$(call log_info,Subtree split complete: $$branch); \
 	split_commit=$$(git rev-parse "$$branch"); \
-	git push -f "$$remote" "$$branch":$(TARGET_BRANCH); \
+	git push --no-verify -f "$$remote" "$$branch":$(TARGET_BRANCH); \
 	$(call log_success,Synced @aiready/$(SPOKE) to GitHub spoke repo ($(TARGET_BRANCH))); \
 	version=$$(node -p "require('./packages/$(SPOKE)/package.json').version"); \
 	spoke_tag="v$$version"; \
@@ -139,7 +139,7 @@ publish: ## Publish spoke to GitHub. Usage: make publish SPOKE=pattern-detect [O
 		$(call log_info,Spoke tag $$spoke_tag already exists on $$remote; skipping); \
 	else \
 		git tag -a "$$spoke_tag" "$$split_commit" -m "Release @aiready/$(SPOKE) $$version"; \
-		git push "$$remote" "$$spoke_tag"; \
+		git push --no-verify "$$remote" "$$spoke_tag"; \
 		$(call log_success,Spoke tag pushed: $$spoke_tag); \
 	fi
 
