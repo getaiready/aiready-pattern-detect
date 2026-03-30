@@ -6,9 +6,11 @@ import {
   ToolScoringOutput,
   SpokeOutputSchema,
   GLOBAL_SCAN_OPTIONS,
+  Severity,
 } from '@aiready/core';
 import { analyzePatterns, PatternDetectOptions } from './analyzer';
 import { calculatePatternScore } from './scoring';
+import { filterBySeverity } from './context-rules';
 
 /**
  * Pattern Detection Tool Provider
@@ -47,8 +49,24 @@ export const PatternDetectProvider: ToolProvider = {
 
   score(output: SpokeOutput, options: ScanOptions): ToolScoringOutput {
     const duplicates = output.summary.duplicates || [];
-    const scoreData = duplicates;
     const totalFiles = output.summary.totalFiles || output.results.length;
+
+    // Filter duplicates by severity to match what the user sees
+    // Smart defaults set severity: 'high' for repos with >3000 estimated blocks
+    // This means only Critical and Major issues are shown, but scoring was done on ALL duplicates
+    let scoreData = duplicates;
+    const patternOptions = options as PatternDetectOptions;
+    if (patternOptions.severity && patternOptions.severity !== 'all') {
+      const severityMap: Record<string, Severity> = {
+        critical: Severity.Critical,
+        high: Severity.Major, // 'high' maps to Major and above
+        medium: Severity.Minor,
+        all: Severity.Info,
+      };
+      const minSeverity = severityMap[patternOptions.severity] || Severity.Info;
+      scoreData = filterBySeverity(duplicates, minSeverity);
+    }
+
     return calculatePatternScore(scoreData, totalFiles, options.costConfig);
   },
 

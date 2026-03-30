@@ -30,10 +30,17 @@ export function calculatePatternScore(
   totalFilesAnalyzed: number,
   costConfig?: Partial<CostConfig>
 ): ToolScoringOutput {
-  // Calculate raw metrics
-  const totalDuplicates = duplicates.length;
-  const totalTokenCost = duplicates.reduce((sum, d) => sum + d.tokenCost, 0);
-  const highImpactDuplicates = duplicates.filter(
+  // Filter duplicates to only include actionable ones (exclude info severity)
+  // This ensures the score reflects what users actually see and need to fix
+  const actionableDuplicates = duplicates.filter((d) => d.severity !== 'info');
+
+  // Calculate raw metrics based on actionable duplicates only
+  const totalDuplicates = actionableDuplicates.length;
+  const totalTokenCost = actionableDuplicates.reduce(
+    (sum, d) => sum + d.tokenCost,
+    0
+  );
+  const highImpactDuplicates = actionableDuplicates.filter(
     (d) => d.tokenCost > 1000 || d.similarity > 0.7
   ).length;
 

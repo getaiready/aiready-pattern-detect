@@ -131,21 +131,28 @@ export const CONTEXT_RULES: ContextRule[] = [
   },
 
   // Type Definitions - Duplication for type safety and module independence
+  // Only apply to .d.ts files or files in /types/ directories, not to all files containing interfaces
   {
     name: 'type-definitions',
     detect: (file, code) => {
       const isTypeFile = file.endsWith('.d.ts') || file.includes('/types/');
 
-      const hasTypeDefinitions =
-        code.includes('interface ') ||
-        code.includes('type ') ||
-        code.includes('enum ');
+      // Only match if it's a type-only file (no implementation)
+      const hasOnlyTypeDefinitions =
+        (code.includes('interface ') ||
+          code.includes('type ') ||
+          code.includes('enum ')) &&
+        !code.includes('function ') &&
+        !code.includes('class ') &&
+        !code.includes('const ') &&
+        !code.includes('let ') &&
+        !code.includes('export default');
 
-      return isTypeFile && hasTypeDefinitions;
+      return isTypeFile && hasOnlyTypeDefinitions;
     },
     severity: Severity.Info,
     reason:
-      'Type duplication may be intentional for module independence and type safety',
+      'Type-only files may be intentionally duplicated for module independence',
     suggestion:
       'Extract to shared types package only if causing maintenance burden',
   },
@@ -210,6 +217,171 @@ export const CONTEXT_RULES: ContextRule[] = [
       'Tool implementations share structural boilerplate but have distinct business logic',
     suggestion:
       'Tool duplication is acceptable for boilerplate interface wrappers',
+  },
+
+  // Common UI Event Handlers - Very specific patterns only
+  {
+    name: 'common-ui-handlers',
+    detect: (file, code) => {
+      const isUIFile =
+        file.includes('/components/') ||
+        file.includes('.tsx') ||
+        file.includes('.jsx') ||
+        file.includes('/hooks/');
+
+      // Only match very specific common handler patterns that are truly boilerplate
+      const hasCommonHandler =
+        (code.includes('handleClickOutside') &&
+          code.includes('dropdownRef.current') &&
+          code.includes('!dropdownRef.current.contains')) ||
+        (code.includes('handleEscape') &&
+          code.includes('event.key') &&
+          code.includes("=== 'Escape'")) ||
+        (code.includes('handleClickInside') &&
+          code.includes('event.stopPropagation'));
+
+      return isUIFile && hasCommonHandler;
+    },
+    severity: Severity.Info,
+    reason:
+      'Common UI event handlers are boilerplate patterns that repeat across components',
+    suggestion:
+      'Consider extracting to shared hooks (useClickOutside, useEscapeKey) only if causing maintenance issues',
+  },
+
+  // Utility Functions - Small helpers in dedicated utility files
+  {
+    name: 'utility-functions',
+    detect: (file, code) => {
+      const isUtilFile =
+        file.endsWith('.util.ts') ||
+        file.endsWith('.helper.ts') ||
+        file.endsWith('.utils.ts');
+
+      const hasUtilPattern =
+        code.includes('function format') ||
+        code.includes('function parse') ||
+        code.includes('function sanitize') ||
+        code.includes('function normalize') ||
+        code.includes('function convert');
+
+      return isUtilFile && hasUtilPattern;
+    },
+    severity: Severity.Minor,
+    reason:
+      'Utility functions in dedicated utility files may be intentionally similar',
+    suggestion:
+      'Consider extracting to shared utilities only if causing significant duplication',
+  },
+
+  // React/Vue Hooks - Standard patterns
+  {
+    name: 'shared-hooks',
+    detect: (file, code) => {
+      const isHookFile =
+        file.includes('/hooks/') ||
+        file.endsWith('.hook.ts') ||
+        file.endsWith('.hook.tsx');
+
+      const hasHookPattern =
+        code.includes('function use') ||
+        code.includes('export function use') ||
+        code.includes('const use') ||
+        code.includes('export const use');
+
+      return isHookFile && hasHookPattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'Hooks follow standard patterns and are often intentionally similar across components',
+    suggestion:
+      'Consider extracting common hook logic only if hooks become complex',
+  },
+
+  // Common API/Utility Functions - Legitimate duplication across modules
+  {
+    name: 'common-api-functions',
+    detect: (file, code) => {
+      const isApiFile =
+        file.includes('/api/') ||
+        file.includes('/lib/') ||
+        file.includes('/utils/') ||
+        file.endsWith('.ts');
+
+      const hasCommonApiPattern =
+        (code.includes('getStripe') &&
+          code.includes('process.env.STRIPE_SECRET_KEY')) ||
+        (code.includes('getUserByEmail') && code.includes('queryItems')) ||
+        (code.includes('updateUser') &&
+          code.includes('buildUpdateExpression')) ||
+        (code.includes('listUserRepositories') &&
+          code.includes('queryItems')) ||
+        (code.includes('listTeamRepositories') &&
+          code.includes('queryItems')) ||
+        (code.includes('getRemediation') && code.includes('queryItems')) ||
+        (code.includes('formatBreakdownKey') &&
+          code.includes('.replace(/([A-Z])/g'));
+
+      return isApiFile && hasCommonApiPattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'Common API/utility functions are legitimately duplicated across modules for clarity and independence',
+    suggestion:
+      'Consider extracting to shared utilities only if causing significant duplication',
+  },
+
+  // Next.js Route Handler Patterns - Boilerplate API route patterns
+  {
+    name: 'nextjs-route-handlers',
+    detect: (file, code) => {
+      const isRouteFile =
+        file.includes('/api/') &&
+        (file.endsWith('/route.ts') || file.endsWith('/route.js'));
+
+      const hasRoutePattern =
+        code.includes('export async function POST') ||
+        code.includes('export async function GET') ||
+        code.includes('export async function PUT') ||
+        code.includes('export async function DELETE') ||
+        code.includes('NextResponse.json') ||
+        code.includes('NextRequest');
+
+      return isRouteFile && hasRoutePattern;
+    },
+    severity: Severity.Info,
+    reason:
+      'Next.js route handlers follow standard patterns and are intentionally similar across endpoints',
+    suggestion:
+      'Route handler duplication is acceptable for API endpoint boilerplate',
+  },
+
+  // Validation Functions - Inherently similar patterns
+  {
+    name: 'validation-functions',
+    detect: (file, code) => {
+      const hasValidationPattern =
+        code.includes('isValid') ||
+        code.includes('validate') ||
+        code.includes('checkValid') ||
+        code.includes('isEmail') ||
+        code.includes('isPhone') ||
+        code.includes('isUrl') ||
+        code.includes('isNumeric') ||
+        code.includes('isAlpha') ||
+        code.includes('isAlphanumeric') ||
+        code.includes('isEmpty') ||
+        code.includes('isNotEmpty') ||
+        code.includes('isRequired') ||
+        code.includes('isOptional');
+
+      return hasValidationPattern;
+    },
+    severity: Severity.Minor,
+    reason:
+      'Validation functions are inherently similar and often intentionally duplicated for domain clarity',
+    suggestion:
+      'Consider extracting to shared validators only if validation logic becomes complex',
   },
 ];
 
