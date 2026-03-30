@@ -1,4 +1,4 @@
-import { Severity, getSeverityLevel } from '@aiready/core';
+import { Severity, getSeverityLevel, IssueType } from '@aiready/core';
 import type { DuplicatePattern, PatternType } from './detector';
 import { calculateSeverity } from './context-rules';
 import path from 'path';
@@ -202,4 +202,97 @@ export function filterClustersByImpact(
   return clusters.filter(
     (c) => c.totalTokenCost >= minTokenCost && c.files.length >= minFiles
   );
+}
+
+/**
+ * Brand-specific indicators that suggest UI components are intentionally different
+ */
+const BRAND_INDICATORS = [
+  'cyberpunk',
+  'cyber-blue',
+  'cyber-purple',
+  'slate-900',
+  'slate-400',
+  'zinc-',
+  'indigo-',
+  'neon-',
+  'glassmorphism',
+  'backdrop-blur',
+];
+
+/**
+ * Check if a file path suggests it's in a different brand/theme context
+ */
+function isBrandSpecificComponent(filePath: string): boolean {
+  const lower = filePath.toLowerCase();
+  const brandingTerms = ['landing', 'clawmore', 'platform', 'apps/'];
+
+  for (const term of brandingTerms) {
+    if (lower.includes(term)) return true;
+  }
+  return false;
+}
+
+/**
+ * Detect if two duplicate files are likely brand-specific variants
+ * (e.g., different themed versions of the same UI component)
+ */
+export function areBrandSpecificVariants(
+  file1: string,
+  file2: string,
+  code1: string,
+  code2: string
+): boolean {
+  // If files are in different app directories, they might be brand variants
+  const f1IsBrand = isBrandSpecificComponent(file1);
+  const f2IsBrand = isBrandSpecificComponent(file2);
+
+  if (f1IsBrand && f2IsBrand && file1 !== file2) {
+    // Check if they share common UI framework elements
+    const hasBrandKeyword = (code: string) => {
+      const lowerCode = code.toLowerCase();
+      return BRAND_INDICATORS.some((ind) => lowerCode.includes(ind));
+    };
+
+    // If one has cyberpunk-specific classes and the other has slate/slate colors,
+    // they're likely intentionally different themed components
+    const code1Brand = hasBrandKeyword(code1);
+    const code2Brand = hasBrandKeyword(code2);
+
+    if (code1Brand && code2Brand) {
+      // Different brands - likely intentional variants
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Filter out brand-specific variants from duplicates
+ */
+export function filterBrandSpecificVariants(
+  duplicates: DuplicatePattern[]
+): DuplicatePattern[] {
+  return duplicates.filter((dup) => {
+    // Don't filter out same-file duplicates
+    if (dup.file1 === dup.file2) return true;
+
+    // Check if these are brand-specific variants
+    const isBrandVariant = areBrandSpecificVariants(
+      dup.file1,
+      dup.file2,
+      dup.code1,
+      dup.code2
+    );
+
+    // If it's a brand variant, mark it as lower severity
+    if (isBrandVariant) {
+      dup.severity = Severity.Info;
+      dup.suggestion = 'Brand-specific themed component variant (intentional)';
+    }
+
+    // Keep all duplicates but downgrade severity for brand variants
+    return true;
+  });
 }
