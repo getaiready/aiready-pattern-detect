@@ -14,10 +14,28 @@ import {
   getSmartDefaults,
   logConfiguration,
 } from './config';
-import { getRefactoringSuggestion } from './summary';
+import {
+  getRefactoringSuggestion,
+  filterBySeverity,
+  getSeverityLabel,
+  calculateSeverity,
+} from './summary';
+import { calculatePatternScore } from './scoring';
 
-export { PatternDetectOptions } from './config';
-export { PatternSummary, generateSummary } from './summary';
+export { Severity };
+export {
+  PatternDetectOptions,
+  getSmartDefaults,
+  logConfiguration,
+} from './config';
+export {
+  PatternSummary,
+  generateSummary,
+  filterBySeverity,
+  getSeverityLabel,
+  calculateSeverity,
+} from './summary';
+export { calculatePatternScore } from './scoring';
 
 /**
  * Main entry point for pattern detection analysis.
@@ -105,12 +123,7 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
       ) {
         severityLevel = Severity.Info;
       } else {
-        severityLevel =
-          dup.similarity > 0.95
-            ? Severity.Critical
-            : dup.similarity > 0.9
-              ? Severity.Major
-              : Severity.Minor;
+        severityLevel = calculateSeverity(dup.similarity);
       }
 
       return {
@@ -125,20 +138,7 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
       };
     });
 
-    let filteredIssues = issues;
-    if (severity !== 'all') {
-      const severityMap = {
-        critical: [Severity.Critical],
-        high: [Severity.Critical, Severity.Major],
-        medium: [Severity.Critical, Severity.Major, Severity.Minor],
-      };
-      const allowedSeverities = severityMap[
-        severity as keyof typeof severityMap
-      ] || [Severity.Critical, Severity.Major, Severity.Minor];
-      filteredIssues = issues.filter((issue) =>
-        allowedSeverities.includes(issue.severity)
-      );
-    }
+    const filteredIssues = filterBySeverity(issues, severity || 'all');
 
     const totalTokenCost = fileDuplicates.reduce(
       (sum, dup) => sum + dup.tokenCost,

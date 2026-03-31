@@ -7,4 +7,17 @@ ToolRegistry.register(PATTERN_DETECT_PROVIDER);
 export * from './detector';
 export * from './analyzer';
 export * from './grouping';
+export {
+  analyzePatterns,
+  PatternDetectOptions,
+  getSmartDefaults,
+  logConfiguration,
+  PatternSummary,
+  generateSummary,
+  filterBySeverity,
+  getSeverityLabel,
+  calculateSeverity,
+  calculatePatternScore,
+  Severity,
+} from './analyzer';
 export { PATTERN_DETECT_PROVIDER };

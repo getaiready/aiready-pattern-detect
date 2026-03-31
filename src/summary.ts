@@ -1,4 +1,4 @@
-import type { AnalysisResult } from '@aiready/core';
+import { AnalysisResult, Issue, Severity } from '@aiready/core';
 import type { PatternType } from './detector';
 
 export interface PatternSummary {
@@ -104,4 +104,49 @@ export function generateSummary(results: AnalysisResult[]): PatternSummary {
     patternsByType,
     topDuplicates,
   };
+}
+
+/**
+ * Filter issues by severity level.
+ */
+export function filterBySeverity(issues: Issue[], severity: string): Issue[] {
+  if (severity === 'all') return issues;
+  const severityMap: Record<string, Severity[]> = {
+    critical: [Severity.Critical],
+    high: [Severity.Critical, Severity.Major],
+    medium: [Severity.Critical, Severity.Major, Severity.Minor],
+  };
+  const allowed = severityMap[severity] || [
+    Severity.Critical,
+    Severity.Major,
+    Severity.Minor,
+  ];
+  return issues.filter((issue) => allowed.includes(issue.severity));
+}
+
+/**
+ * Get human-readable label for severity.
+ */
+export function getSeverityLabel(severity: Severity): string {
+  switch (severity) {
+    case Severity.Critical:
+      return 'CRITICAL';
+    case Severity.Major:
+      return 'HIGH';
+    case Severity.Minor:
+      return 'MEDIUM';
+    case Severity.Info:
+      return 'LOW';
+    default:
+      return 'UNKNOWN';
+  }
+}
+
+/**
+ * Calculate severity based on similarity.
+ */
+export function calculateSeverity(similarity: number): Severity {
+  if (similarity > 0.95) return Severity.Critical;
+  if (similarity > 0.9) return Severity.Major;
+  return Severity.Minor;
 }
