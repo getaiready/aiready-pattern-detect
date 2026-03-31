@@ -15,7 +15,7 @@ import { filterBySeverity } from './context-rules';
 /**
  * Pattern Detection Tool Provider
  */
-export const PatternDetectProvider: ToolProvider = {
+export const PATTERN_DETECT_PROVIDER: ToolProvider = {
   id: ToolName.PatternDetect,
   alias: ['patterns', 'duplicates', 'duplication'],
 
