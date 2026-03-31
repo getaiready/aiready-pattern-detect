@@ -1,6 +1,6 @@
 import { scanFiles, readFileContent, Severity, IssueType } from '@aiready/core';
 import type { AnalysisResult, Issue } from '@aiready/core';
-import { detectDuplicatePatterns } from './detector';
+import { detectDuplicatePatterns, type DuplicatePattern } from './detector';
 import {
   groupDuplicatesByFilePair,
   createRefactorClusters,
