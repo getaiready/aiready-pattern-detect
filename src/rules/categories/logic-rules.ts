@@ -2,6 +2,33 @@ import { Severity } from '@aiready/core';
 import { ContextRule } from '../types';
 
 export const LOGIC_RULES: ContextRule[] = [
+  // Re-export / Barrel files - Intentional API surface consolidation
+  {
+    name: 're-export-files',
+    detect: (file, code) => {
+      const isIndexFile =
+        file.endsWith('/index.ts') ||
+        file.endsWith('/index.js') ||
+        file.endsWith('/index.tsx') ||
+        file.endsWith('/index.jsx');
+      const lines = code.split('\n').filter((l) => l.trim());
+      if (lines.length === 0) return false;
+      const reExportLines = lines.filter(
+        (l) =>
+          /^export\s+(\{[^}]+\}|\*)\s+from\s+/.test(l.trim()) ||
+          /^export\s+\*\s+as\s+\w+\s+from\s+/.test(l.trim())
+      ).length;
+      return (
+        isIndexFile && reExportLines > 0 && reExportLines / lines.length > 0.5
+      );
+    },
+    severity: Severity.Info,
+    reason:
+      'Barrel/index files intentionally re-export for API surface consolidation',
+    suggestion:
+      'Re-exports in barrel files are expected and not true duplication',
+  },
+
   // Type Definitions - Duplication for type safety and module independence
   {
     name: 'type-definitions',
