@@ -1,12 +1,12 @@
 import { ToolRegistry, Severity } from '@aiready/core';
-import { PatternDetectProvider } from './provider';
+import { PATTERN_DETECT_PROVIDER } from './provider';
 
 // Register with global registry
-ToolRegistry.register(PatternDetectProvider);
+ToolRegistry.register(PATTERN_DETECT_PROVIDER);
 
 export * from './analyzer';
 export * from './detector';
 export * from './grouping';
 export * from './scoring';
 export * from './context-rules';
-export { PatternDetectProvider, Severity };
+export { PATTERN_DETECT_PROVIDER, Severity };

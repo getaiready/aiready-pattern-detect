@@ -3,9 +3,9 @@ import * as patternDetect from '../index';
 
 describe('pattern-detect index', () => {
   describe('exports', () => {
-    it('should export PatternDetectProvider', () => {
-      expect(patternDetect.PatternDetectProvider).toBeDefined();
-      expect(patternDetect.PatternDetectProvider.id).toBe('pattern-detect');
+    it('should export PATTERN_DETECT_PROVIDER', () => {
+      expect(patternDetect.PATTERN_DETECT_PROVIDER).toBeDefined();
+      expect(patternDetect.PATTERN_DETECT_PROVIDER.id).toBe('pattern-detect');
     });
 
     it('should export Severity from @aiready/core', () => {
@@ -41,32 +41,36 @@ describe('pattern-detect index', () => {
     });
   });
 
-  describe('PatternDetectProvider', () => {
+  describe('PATTERN_DETECT_PROVIDER', () => {
     it('should have required provider methods', () => {
-      expect(typeof patternDetect.PatternDetectProvider.analyze).toBe(
+      expect(typeof patternDetect.PATTERN_DETECT_PROVIDER.analyze).toBe(
         'function'
       );
-      expect(typeof patternDetect.PatternDetectProvider.score).toBe('function');
+      expect(typeof patternDetect.PATTERN_DETECT_PROVIDER.score).toBe(
+        'function'
+      );
     });
 
     it('should have alias array', () => {
-      expect(Array.isArray(patternDetect.PatternDetectProvider.alias)).toBe(
+      expect(Array.isArray(patternDetect.PATTERN_DETECT_PROVIDER.alias)).toBe(
         true
       );
-      expect(patternDetect.PatternDetectProvider.alias).toContain('patterns');
-      expect(patternDetect.PatternDetectProvider.alias).toContain('duplicates');
-      expect(patternDetect.PatternDetectProvider.alias).toContain(
+      expect(patternDetect.PATTERN_DETECT_PROVIDER.alias).toContain('patterns');
+      expect(patternDetect.PATTERN_DETECT_PROVIDER.alias).toContain(
+        'duplicates'
+      );
+      expect(patternDetect.PATTERN_DETECT_PROVIDER.alias).toContain(
         'duplication'
       );
     });
 
     it('should have defaultWeight', () => {
-      expect(typeof patternDetect.PatternDetectProvider.defaultWeight).toBe(
+      expect(typeof patternDetect.PATTERN_DETECT_PROVIDER.defaultWeight).toBe(
         'number'
       );
-      expect(patternDetect.PatternDetectProvider.defaultWeight).toBeGreaterThan(
-        0
-      );
+      expect(
+        patternDetect.PATTERN_DETECT_PROVIDER.defaultWeight
+      ).toBeGreaterThan(0);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { PatternDetectProvider } from '../provider';
+import { PATTERN_DETECT_PROVIDER } from '../provider';
 import * as analyzer from '../analyzer';
 
 vi.mock('../analyzer', async () => {
@@ -19,7 +19,7 @@ describe('Pattern Detect Provider', () => {
       config: { rootDir: '.' },
     } as any);
 
-    const output = await PatternDetectProvider.analyze({ rootDir: '.' });
+    const output = await PATTERN_DETECT_PROVIDER.analyze({ rootDir: '.' });
 
     expect(output.summary.totalFiles).toBe(1);
     expect(output.metadata!.toolName).toBe('pattern-detect');
@@ -35,7 +35,7 @@ describe('Pattern Detect Provider', () => {
       config: { rootDir: '.' },
     } as any);
 
-    const output = await PatternDetectProvider.analyze({ rootDir: '.' });
+    const output = await PATTERN_DETECT_PROVIDER.analyze({ rootDir: '.' });
 
     expect(output.summary.duplicates).toBeDefined();
     expect(output.summary.duplicates).toHaveLength(1);
@@ -52,7 +52,7 @@ describe('Pattern Detect Provider', () => {
       results: [],
     };
 
-    const scoring = PatternDetectProvider.score(mockOutput as any, {
+    const scoring = PATTERN_DETECT_PROVIDER.score(mockOutput as any, {
       rootDir: '.',
     });
 
@@ -67,7 +67,7 @@ describe('Pattern Detect Provider', () => {
       results: [],
     };
 
-    const scoring = PatternDetectProvider.score(mockOutput as any, {
+    const scoring = PATTERN_DETECT_PROVIDER.score(mockOutput as any, {
       rootDir: '.',
     });
     expect(scoring.score).toBeDefined();
