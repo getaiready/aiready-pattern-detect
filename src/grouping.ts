@@ -1,4 +1,4 @@
-import { Severity, getSeverityLevel, IssueType } from '@aiready/core';
+import { Severity, getSeverityLevel } from '@aiready/core';
 import type { DuplicatePattern, PatternType } from './detector';
 import { calculateSeverity } from './context-rules';
 import path from 'path';
