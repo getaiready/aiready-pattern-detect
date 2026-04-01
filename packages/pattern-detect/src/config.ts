@@ -1,4 +1,4 @@
-import { scanFiles, Severity } from '@aiready/core';
+import { scanFiles } from '@aiready/core';
 import type { ScanOptions } from '@aiready/core';
 
 export interface PatternDetectOptions extends ScanOptions {

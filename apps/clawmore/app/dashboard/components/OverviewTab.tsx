@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Layers,
-  Zap,
-  Activity,
-  Shield,
-  Clock,
-  TrendingDown,
-} from 'lucide-react';
+import { Layers, Zap, Activity, Clock, TrendingDown } from 'lucide-react';
 
 interface OverviewTabProps {
   status: any;

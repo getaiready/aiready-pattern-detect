@@ -1,7 +1,5 @@
 'use client';
 
-import { ShieldCheck } from 'lucide-react';
-
 export default function SocialProof() {
   return (
     <section className="py-16 bg-black/20 border-y border-white/5">

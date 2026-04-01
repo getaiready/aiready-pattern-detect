@@ -17,10 +17,8 @@ import {
 import {
   getRefactoringSuggestion,
   filterBySeverity,
-  getSeverityLabel,
   calculateSeverity,
 } from './summary';
-import { calculatePatternScore } from './scoring';
 
 export { Severity };
 export {
@@ -32,8 +30,8 @@ export {
   PatternSummary,
   generateSummary,
   filterBySeverity,
-  getSeverityLabel,
   calculateSeverity,
+  getSeverityLabel,
 } from './summary';
 export { calculatePatternScore } from './scoring';
 

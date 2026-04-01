@@ -207,33 +207,6 @@ function isDeprecatedPackage(name: string): boolean {
   });
 }
 
-/**
- * Check npm registry for outdated packages.
- * Returns true if the package's latest version was published more than 2 years ago.
- */
-async function checkNpmOutdated(name: string): Promise<boolean> {
-  try {
-    const response = await fetch(
-      `https://registry.npmjs.org/${encodeURIComponent(name)}`,
-      {
-        headers: { Accept: 'application/vnd.npm.install-v1+json' },
-        signal: AbortSignal.timeout(3000),
-      }
-    );
-    if (!response.ok) return false;
-    const data = (await response.json()) as any;
-    const latest = data['dist-tags']?.latest;
-    if (!latest) return false;
-    const modified = data.time?.[latest];
-    if (!modified) return false;
-    const twoYearsAgo = new Date();
-    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-    return new Date(modified) < twoYearsAgo;
-  } catch {
-    return false;
-  }
-}
-
 function evaluateHealth(
   type: string,
   deps: string[],

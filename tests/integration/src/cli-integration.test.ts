@@ -1,12 +1,6 @@
 import { describe, it, expect } from 'vitest';
-// @ts-ignore
-import { analyzeUnified, scoreUnified } from '../../packages/cli/dist/index.js';
-// @ts-ignore
-import {
-  validateSpokeOutput,
-  ToolRegistry,
-  ToolName,
-} from '../../packages/core/dist/index.js';
+import { analyzeUnified, scoreUnified } from '@aiready/cli';
+import { validateSpokeOutput, ToolRegistry, ToolName } from '@aiready/core';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,7 +13,7 @@ describe('CLI Registry Integration', () => {
     const rootDir = path.resolve(__dirname, '../../packages/core');
 
     console.log(
-      `[TEST] ToolRegistry instanceId: ${(ToolRegistry as any).instanceId}`
+      `[TEST] ToolRegistry instanceId: ${(ToolRegistry as any).getGlobalRegistry?.()?.id}`
     );
 
     // Get all possible tool IDs from the enum

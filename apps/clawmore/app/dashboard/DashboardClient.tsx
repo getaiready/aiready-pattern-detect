@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Layers, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import ProvisioningConsole from './ProvisioningConsole';
 import { useDashboardStatus } from './hooks/useDashboardStatus';
 import OverviewTab from './components/OverviewTab';

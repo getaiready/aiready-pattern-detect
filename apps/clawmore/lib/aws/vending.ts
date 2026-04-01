@@ -17,7 +17,6 @@ import {
   AttachRolePolicyCommand,
   CreateOpenIDConnectProviderCommand,
   GetOpenIDConnectProviderCommand,
-  PutRolePolicyCommand,
 } from '@aws-sdk/client-iam';
 import {
   CodeBuildClient,

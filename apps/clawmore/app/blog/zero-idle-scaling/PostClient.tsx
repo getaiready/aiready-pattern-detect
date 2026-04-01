@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingDown, Unplug } from 'lucide-react';
+import { Unplug } from 'lucide-react';
 import BlogLayout from '../_components/BlogLayout';
 import SystemFlow from '../../../components/SystemFlow';
 

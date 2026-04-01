@@ -2,15 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import {
-  Calendar,
-  User,
-  ArrowLeft,
-  Layers,
-  Zap,
-  Clock,
-  TrendingDown,
-} from 'lucide-react';
+import { Calendar, ArrowLeft, Clock, TrendingDown } from 'lucide-react';
 import SeriesNavigation from '../_components/SeriesNavigation';
 
 export default function PostClient() {
@@ -151,6 +143,7 @@ export default function PostClient() {
           <div className="p-1 border-t border-white/10 pt-16 flex flex-col items-center text-center">
             <img
               src="/logo.png"
+              alt=""
               className="w-12 h-12 mb-8 grayscale opacity-50"
             />
             <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.5em] mb-4">

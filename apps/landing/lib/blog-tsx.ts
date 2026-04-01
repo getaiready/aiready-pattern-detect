@@ -2,7 +2,7 @@ import {
   posts as staticPosts,
   getPostBySlug as getPostBySlugFromRegistry,
 } from '../../landing/content/blog-tsx/index';
-import type { BlogPostMeta } from '../../landing/content/blog-tsx/posts-registry';
+
 import React from 'react';
 
 export type BlogPost = {

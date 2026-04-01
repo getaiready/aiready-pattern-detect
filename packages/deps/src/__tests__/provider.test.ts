@@ -3,7 +3,7 @@ import { DEPS_PROVIDER } from '../provider';
 
 describe('Deps Provider', () => {
   it('should have correct ID', () => {
-    expect(DEPS_PROVIDER.id).toBe('deps');
+    expect(DEPS_PROVIDER.id).toBe('dependency-health');
   });
 
   it('should have alias', () => {

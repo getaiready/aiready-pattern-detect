@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  classifyFile,
-  adjustFragmentationForClassification,
-  adjustCohesionForClassification,
-  getClassificationRecommendations,
-} from '../index';
+import { classifyFile } from '../index';
 import { createNode } from './file-classification.fixtures';
 
 describe('file classification core', () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, Zap, Lock } from 'lucide-react';
+import { ShieldCheck, Lock } from 'lucide-react';
 import Link from 'next/link';
 import BlogLayout from '../_components/BlogLayout';
 import SystemFlow from '../../../components/SystemFlow';
