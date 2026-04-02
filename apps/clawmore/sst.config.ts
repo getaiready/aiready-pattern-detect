@@ -1,6 +1,5 @@
-// @ts-nocheck
-
 /// <reference path="./.sst/platform/config.d.ts" />
+/// <reference path="../../types/sst-stripe.d.ts" />
 
 // Suppress AWS SDK warning when both profile and static keys are set
 // by prioritizing the profile (which is the project standard)
@@ -21,13 +20,13 @@ export default $config({
       providers: {
         stripe: true,
       },
-    } as any;
+    };
   },
   async run() {
     const isProd = $app.stage === 'production';
 
     // Configure the Stripe provider explicitly
-    const stripeProvider = new (stripe as any).Provider('StripeProvider', {
+    const stripeProvider = new stripe.Provider('StripeProvider', {
       apiKey:
         process.env.STRIPE_SECRET_KEY || $app.stage === 'local'
           ? 'sk_test_mock'
@@ -48,7 +47,7 @@ export default $config({
     // --- Stripe Products & Prices (IaC) ---
 
     // 1. Managed Platform Subscription ($29/mo - Starter)
-    const platformProduct = new (stripe as any).Product(
+    const platformProduct = new stripe.Product(
       'PlatformProduct',
       {
         name: 'ClawMore Managed Platform',
@@ -58,7 +57,7 @@ export default $config({
       { provider: stripeProvider }
     );
 
-    const platformPrice = new (stripe as any).Price(
+    const platformPrice = new stripe.Price(
       'PlatformPrice',
       {
         product: platformProduct.id,
@@ -71,7 +70,7 @@ export default $config({
     );
 
     // 1b. Pro tier ($99/mo)
-    const proPrice = new (stripe as any).Price(
+    const proPrice = new stripe.Price(
       'ProPrice',
       {
         product: platformProduct.id,
@@ -84,7 +83,7 @@ export default $config({
     );
 
     // 1c. Team tier ($299/mo)
-    const teamPrice = new (stripe as any).Price(
+    const teamPrice = new stripe.Price(
       'TeamPrice',
       {
         product: platformProduct.id,
@@ -97,7 +96,7 @@ export default $config({
     );
 
     // 2. AI Fuel Pack ($10.00 one-time top-up)
-    const fuelPackProduct = new (stripe as any).Product(
+    const fuelPackProduct = new stripe.Product(
       'FuelPackProduct',
       {
         name: 'AI Credit Pack',
@@ -106,7 +105,7 @@ export default $config({
       { provider: stripeProvider }
     );
 
-    const fuelPackPrice = new (stripe as any).Price(
+    const fuelPackPrice = new stripe.Price(
       'FuelPackPrice',
       {
         product: fuelPackProduct.id,
@@ -119,7 +118,7 @@ export default $config({
     // 4. Mutation Tax ($1.00 per mutation - Metered)
     // Note: Stripe metered prices require a base price with interval_count >= 1
     // We'll create a simple recurring price instead
-    const mutationTaxPrice = new (stripe as any).Price(
+    const mutationTaxPrice = new stripe.Price(
       'MutationTaxPrice',
       {
         product: platformProduct.id,
@@ -134,7 +133,7 @@ export default $config({
     );
 
     // 3. Stripe Webhook Endpoint — tells Stripe where to send events
-    const webhookEndpoint = new (stripe as any).WebhookEndpoint(
+    const webhookEndpoint = new stripe.WebhookEndpoint(
       'StripeWebhook',
       {
         url: `https://${domainName}/api/webhooks/stripe`,

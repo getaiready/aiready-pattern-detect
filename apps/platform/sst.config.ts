@@ -1,5 +1,5 @@
-// @ts-nocheck
 /// <reference path="./.sst/platform/config.d.ts" />
+/// <reference path="../../types/sst-stripe.d.ts" />
 
 // Suppress AWS SDK warning when both profile and static keys are set
 // by prioritizing the profile (which is the project standard)
@@ -24,14 +24,14 @@ export default $config({
   },
   async run() {
     // Configure the Stripe provider explicitly
-    const stripeProvider = new (stripe as any).Provider('StripeProvider', {
+    const stripeProvider = new stripe.Provider('StripeProvider', {
       apiKey: process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder',
     });
 
     // --- Stripe Products & Prices (IaC) ---
 
     // 1. Pro Plan ($49/mo)
-    const proProduct = new (stripe as any).Product(
+    const proProduct = new stripe.Product(
       'ProProduct',
       {
         name: 'AIReady Pro',
@@ -41,7 +41,7 @@ export default $config({
       { provider: stripeProvider }
     );
 
-    const proPrice = new (stripe as any).Price(
+    const proPrice = new stripe.Price(
       'ProPrice',
       {
         product: proProduct.id,
@@ -53,7 +53,7 @@ export default $config({
     );
 
     // 2. Team Plan ($99/mo)
-    const teamProduct = new (stripe as any).Product(
+    const teamProduct = new stripe.Product(
       'TeamProduct',
       {
         name: 'AIReady Team',
@@ -63,7 +63,7 @@ export default $config({
       { provider: stripeProvider }
     );
 
-    const teamPrice = new (stripe as any).Price(
+    const teamPrice = new stripe.Price(
       'TeamPrice',
       {
         product: teamProduct.id,
@@ -75,7 +75,7 @@ export default $config({
     );
 
     // 3. Enterprise Plan ($299/mo)
-    const enterpriseProduct = new (stripe as any).Product(
+    const enterpriseProduct = new stripe.Product(
       'EnterpriseProduct',
       {
         name: 'AIReady Enterprise',
@@ -85,7 +85,7 @@ export default $config({
       { provider: stripeProvider }
     );
 
-    const enterprisePrice = new (stripe as any).Price(
+    const enterprisePrice = new stripe.Price(
       'EnterprisePrice',
       {
         product: enterpriseProduct.id,
@@ -119,7 +119,7 @@ export default $config({
         : `${$app.stage}.platform.getaiready.dev`;
 
     // Stripe Webhook Endpoint
-    const webhookEndpoint = new (stripe as any).WebhookEndpoint(
+    const webhookEndpoint = new stripe.WebhookEndpoint(
       'StripeWebhook',
       {
         url: `https://${webhookDomain}/api/billing/webhook`,
