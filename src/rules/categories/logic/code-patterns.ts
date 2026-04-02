@@ -45,6 +45,20 @@ export const CodePatterns = {
     return hasTypes && hasNoImpl;
   },
 
+  hasOnlyTypeDefinitions: (code: string): boolean => {
+    const hasTypes = CodePatterns.hasTypeDefinition(code);
+    const hasNoImpl = ![
+      'function ',
+      'class ',
+      'const ',
+      'let ',
+      'var ',
+      'export default',
+      'export {',
+    ].some((kw) => code.includes(kw));
+    return hasTypes && hasNoImpl;
+  },
+
   // Utility patterns - function group patterns
   hasFunctionGroup: (code: string, prefix: string): boolean => {
     const regex = new RegExp(
@@ -141,5 +155,26 @@ export const CodePatterns = {
         /^export\s+\*\s+as\s+\w+\s+from\s+/.test(l.trim())
     ).length;
     return reExportLines > 0 && reExportLines / lines.length > 0.5;
+  },
+
+  // Interface-only snippets - detect files that only export interfaces/types
+  isInterfaceOnlySnippet: (code: string): boolean => {
+    const hasInterface = code.includes('interface ');
+    const hasType = code.includes('type ');
+    const hasEnum = code.includes('enum ');
+
+    // Check if file only contains type definitions (no implementations)
+    const hasNoImpl = ![
+      'function ',
+      'class ',
+      'const ',
+      'let ',
+      'var ',
+      'export default',
+      'export {',
+    ].some((kw) => code.includes(kw));
+
+    // Must have at least one type definition and no implementations
+    return (hasInterface || hasType || hasEnum) && hasNoImpl;
   },
 };
