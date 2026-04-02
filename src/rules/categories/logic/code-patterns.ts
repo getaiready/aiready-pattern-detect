@@ -1,79 +1,105 @@
 /**
  * Code pattern detection utilities - consolidates similar pattern checks
- * Reduces 40+ LOC of repetitive pattern detection logic
+ * Uses pattern registry to reduce duplication
  */
+
+// Common enum value patterns - register once, reuse everywhere
+const COMMON_ENUM_PATTERNS = [
+  ['LOW', ["'low'", '0', "'LOW'"]],
+  ['HIGH', ["'high'", '2', "'HIGH'"]],
+  ['MEDIUM', ["'medium'", '1', "'MEDIUM'"]],
+] as const;
+
+const hasEnumValue = (
+  code: string,
+  enumName: string,
+  variants: string[]
+): boolean => variants.some((v) => code.includes(`${enumName} = ${v}`));
 
 export const CodePatterns = {
   // Enum patterns
   hasCommonEnumValues: (code: string): boolean =>
-    (code.includes("LOW = 'low'") ||
-      code.includes('LOW = 0') ||
-      code.includes("LOW = 'LOW'")) &&
-    (code.includes("HIGH = 'high'") ||
-      code.includes('HIGH = 2') ||
-      code.includes("HIGH = 'HIGH'")) &&
-    (code.includes("MEDIUM = 'medium'") ||
-      code.includes('MEDIUM = 1') ||
-      code.includes("MEDIUM = 'MEDIUM'")),
+    COMMON_ENUM_PATTERNS.every(([name, variants]) =>
+      hasEnumValue(code, name, variants as string[])
+    ),
 
   isEnumDefinition: (code: string): boolean =>
     /(?:export\s+)?(?:const\s+)?enum\s+/.test(code) ||
     (code.includes('enum ') && code.includes('{') && code.includes('}')),
 
-  // Type patterns
-  hasOnlyTypeDefinitions: (code: string): boolean =>
-    (code.includes('interface ') ||
-      code.includes('type ') ||
-      code.includes('enum ')) &&
-    !code.includes('function ') &&
-    !code.includes('class ') &&
-    !code.includes('const ') &&
-    !code.includes('let ') &&
-    !code.includes('export default'),
-
-  isInterfaceOnlySnippet: (code: string): boolean =>
-    code.trim().startsWith('interface ') &&
-    code.includes('{') &&
-    code.includes('}') &&
-    !code.includes('function ') &&
-    !code.includes('const ') &&
-    !code.includes('return '),
-
+  // Type patterns - helpers for checking type-only definitions
   hasTypeDefinition: (code: string): boolean =>
     code.includes('interface ') ||
     code.includes('type ') ||
     code.includes('enum '),
 
-  // Utility patterns
-  hasUtilPattern: (code: string): boolean =>
-    code.includes('function format') ||
-    code.includes('function parse') ||
-    code.includes('function sanitize') ||
-    code.includes('function normalize') ||
-    code.includes('function convert'),
+  isTypeOnlyFile: (code: string): boolean => {
+    const hasTypes = CodePatterns.hasTypeDefinition(code);
+    const hasNoImpl = ![
+      'function ',
+      'class ',
+      'const ',
+      'let ',
+      'export default',
+    ].some((kw) => code.includes(kw));
+    return hasTypes && hasNoImpl;
+  },
 
-  // Hook patterns
+  // Utility patterns - function group patterns
+  hasFunctionGroup: (code: string, prefix: string): boolean => {
+    const regex = new RegExp(
+      `${prefix}(format|parse|sanitize|normalize|convert)`,
+      'i'
+    );
+    return regex.test(code);
+  },
+
+  // Pattern checkers using keyword lists
+  hasKeywordGroup: (code: string, keywords: string[]): boolean =>
+    keywords.some((kw) => code.includes(kw)),
+
+  // Validation patterns - unified keyword check
+  hasValidationPattern: (code: string): boolean =>
+    CodePatterns.hasKeywordGroup(code, [
+      'isValid',
+      'validate',
+      'checkValid',
+      'isEmail',
+      'isPhone',
+      'isUrl',
+      'isNumeric',
+      'isAlpha',
+      'isAlphanumeric',
+      'isEmpty',
+      'isNotEmpty',
+      'isRequired',
+      'isOptional',
+    ]),
+
+  // Hook patterns - React/Vue hooks
   hasHookPattern: (code: string): boolean =>
-    code.includes('function use') ||
-    code.includes('export function use') ||
-    code.includes('const use') ||
-    code.includes('export const use'),
+    CodePatterns.hasKeywordGroup(code, [
+      'function use',
+      'export function use',
+      'const use',
+      'export const use',
+    ]),
 
-  // Score patterns
+  // Score/Rating patterns
   hasScorePattern: (code: string): boolean =>
     (code.includes('if (score >=') || code.includes('if (score >')) &&
     code.includes('return') &&
     code.includes("'") &&
     code.split('if (score').length >= 3,
 
-  // Visualization patterns
+  // Visualization patterns - D3/Canvas
   hasVizPattern: (code: string): boolean =>
-    (code.includes('dragstarted') ||
-      code.includes('dragged') ||
-      code.includes('dragended')) &&
-    (code.includes('simulation') ||
-      code.includes('d3.') ||
-      code.includes('alphaTarget')),
+    CodePatterns.hasKeywordGroup(code, [
+      'dragstarted',
+      'dragged',
+      'dragended',
+    ]) &&
+    CodePatterns.hasKeywordGroup(code, ['simulation', 'd3.', 'alphaTarget']),
 
   // Switch/Icon patterns
   hasSwitchPattern: (code: string): boolean =>
@@ -83,26 +109,12 @@ export const CodePatterns = {
     code.split('case ').length >= 4,
 
   hasIconPattern: (code: string): boolean =>
-    code.includes('getIcon') ||
-    code.includes('getColor') ||
-    code.includes('getLabel') ||
-    code.includes('getRating'),
-
-  // Validation patterns
-  hasValidationPattern: (code: string): boolean =>
-    code.includes('isValid') ||
-    code.includes('validate') ||
-    code.includes('checkValid') ||
-    code.includes('isEmail') ||
-    code.includes('isPhone') ||
-    code.includes('isUrl') ||
-    code.includes('isNumeric') ||
-    code.includes('isAlpha') ||
-    code.includes('isAlphanumeric') ||
-    code.includes('isEmpty') ||
-    code.includes('isNotEmpty') ||
-    code.includes('isRequired') ||
-    code.includes('isOptional'),
+    CodePatterns.hasKeywordGroup(code, [
+      'getIcon',
+      'getColor',
+      'getLabel',
+      'getRating',
+    ]),
 
   // Singleton patterns
   hasSingletonGetter: (code: string): boolean =>
@@ -117,10 +129,7 @@ export const CodePatterns = {
     (code.includes('if (!') &&
       code.includes('instance') &&
       code.includes(' = ')) ||
-    (code.includes('if (!_') && code.includes(' = new ')) ||
-    (code.includes('if (') &&
-      code.includes(' === null') &&
-      code.includes(' = new ')),
+    (code.includes('if (!_') && code.includes(' = new ')),
 
   // Re-export patterns
   hasReExportPattern: (code: string): boolean => {
