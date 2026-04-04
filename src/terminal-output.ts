@@ -10,6 +10,11 @@ import type { PatternType } from './detector';
 
 /**
  * Prints the analysis summary to the terminal.
+ *
+ * @param resultsLength - Number of files analyzed
+ * @param totalIssues - Total number of AI confusion patterns detected
+ * @param totalTokenCost - Total token cost wasted
+ * @param elapsedTime - Time taken for analysis in seconds
  */
 export function printAnalysisSummary(
   resultsLength: number,
@@ -35,6 +40,8 @@ export function printAnalysisSummary(
 
 /**
  * Prints the pattern type breakdown.
+ *
+ * @param patternsByType - Map of pattern types to their counts
  */
 export function printPatternBreakdown(patternsByType: Record<string, number>) {
   const sortedTypes = Object.entries(patternsByType)
@@ -57,6 +64,9 @@ export function printPatternBreakdown(patternsByType: Record<string, number>) {
 
 /**
  * Prints grouped duplicate pairs.
+ *
+ * @param groups - Array of duplicate groups
+ * @param maxResults - Maximum number of results to display
  */
 export function printDuplicateGroups(groups: any[], maxResults: number) {
   if (groups.length === 0) return;
@@ -159,6 +169,9 @@ export function printRefactorClusters(clusters: any[]) {
 
 /**
  * Prints raw duplicate patterns.
+ *
+ * @param duplicates - Array of duplicate pattern results
+ * @param maxResults - Maximum number of results to display
  */
 export function printRawDuplicates(duplicates: any[], maxResults: number) {
   if (duplicates.length === 0) return;

@@ -66,7 +66,15 @@ export async function detectDuplicatePatterns(
   const allBlocks: CodeBlock[] = [];
 
   // Pre-compile exclude regexes
-  const excludeRegexes = excludePatterns.map((p) => new RegExp(p, 'i'));
+  const regexStr = (f: string) =>
+    f
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape most regex characters
+      .replace(/\\\*/g, '[^/]*') // Convert escaped * back to [^/]*
+      .replace(/\[\^\/\]\*\[\^\/\]\*/g, '.*'); // Convert ** back to .*
+
+  const excludeRegexes = excludePatterns.map(
+    (p) => new RegExp(`${regexStr(p)}$`, 'i')
+  );
 
   for (const { file, content } of fileContents) {
     const blocks = extractBlocks(file, content);

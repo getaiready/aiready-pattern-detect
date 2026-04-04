@@ -48,6 +48,7 @@ export interface DetectionOptions {
   maxCandidatesPerBlock: number;
   streamResults: boolean;
   excludePatterns?: string[];
+  excludeFiles?: string[];
   confidenceThreshold?: number;
   ignoreWhitelist?: string[];
   onProgress?: (processed: number, total: number, message: string) => void;

@@ -15,6 +15,7 @@ export interface PatternDetectOptions extends ScanOptions {
   minClusterTokenCost?: number; // Minimum token cost for cluster reporting (default: 1000)
   minClusterFiles?: number; // Minimum files for cluster reporting (default: 3)
   excludePatterns?: string[]; // Regex patterns to exclude specific code content
+  excludeFiles?: string[]; // Regex patterns to exclude specific files
   confidenceThreshold?: number; // 0-1, minimum confidence score for reporting
   ignoreWhitelist?: string[]; // List of file pairs or patterns to ignore (false-positive whitelist)
   onProgress?: (processed: number, total: number, message: string) => void;

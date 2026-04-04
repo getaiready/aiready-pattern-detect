@@ -66,6 +66,7 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     minClusterTokenCost = 1000,
     minClusterFiles = 3,
     excludePatterns = [],
+    excludeFiles = [],
     confidenceThreshold = 0,
     ignoreWhitelist = [],
     ...scanOptions
@@ -99,6 +100,7 @@ export async function analyzePatterns(options: PatternDetectOptions): Promise<{
     maxCandidatesPerBlock,
     streamResults,
     excludePatterns,
+    excludeFiles,
     confidenceThreshold,
     ignoreWhitelist,
     onProgress: options.onProgress,
