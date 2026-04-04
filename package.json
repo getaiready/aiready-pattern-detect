@@ -39,6 +39,7 @@
     "build": "tsup src/index.ts src/cli.ts src/analyzer-entry/index.ts src/detector-entry/index.ts src/scoring-entry/index.ts src/context-rules-entry/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts src/cli.ts src/analyzer-entry/index.ts src/detector-entry/index.ts src/scoring-entry/index.ts src/context-rules-entry/index.ts --format cjs,esm --dts --watch",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint src",
     "clean": "rm -rf dist",
     "prepublishOnly": "pnpm build",
