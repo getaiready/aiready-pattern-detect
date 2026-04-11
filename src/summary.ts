@@ -183,5 +183,6 @@ export function getSeverityLabel(severity: Severity): string {
 export function calculateSeverity(similarity: number): Severity {
   if (similarity > 0.95) return Severity.Critical;
   if (similarity > 0.9) return Severity.Major;
-  return Severity.Minor;
+  if (similarity > 0.7) return Severity.Minor;
+  return Severity.Info;
 }

@@ -60,7 +60,7 @@ export async function getSmartDefaults(
 
   const minSimilarity = Math.min(0.75, 0.45 + (estimatedBlocks / 10000) * 0.3);
   const batchSize = estimatedBlocks > 1000 ? 200 : 100;
-  const severity = (estimatedBlocks > 3000 ? 'high' : 'all') as any;
+  const severity = (estimatedBlocks > 5000 ? 'high' : 'all') as any;
   const maxCandidatesPerBlock = Math.max(
     5,
     Math.min(100, Math.floor(1000000 / estimatedBlocks))
